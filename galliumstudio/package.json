@@ -1,0 +1,25 @@
+{
+  "name": "galliumstudio",
+  "version": "0.0.4",
+  "description": "An event framework for statecharts.",
+  "main": "lib/index.js",
+  "scripts": {
+    "build": "babel lib --out-dir dist",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Gallium Studio LLC",
+  "license": "GPL-3.0",
+  "dependencies": {
+    "setimmediate": "^1.0.5",
+    "tiny-emitter": "^2.0.2",
+    "xstate": "^4.15.4"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.3",
+    "babel-loader": "^7.1.5",
+    "babel-preset-env": "^1.7.0",
+    "babel-preset-react": "^6.24.1",
+    "babel-preset-stage-0": "^6.24.1"
+  }
+}
