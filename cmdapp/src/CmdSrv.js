@@ -51,6 +51,7 @@ let http = require("http")
 
 // Application constants.
 const HTTP_PORT = 60000
+const HTTP_PORT_PY = 60001      // For launching brython web application.
 const TCP_PORT = 60002
 const TCPJS_PORT = 60003
 const CLI_PORT = 60004
@@ -123,6 +124,9 @@ class CmdSrv extends Hsm {
             expressApp: null,
             httpServer: null,
             wsServer: null,
+            expressPyApp: null,     // For brython.
+            httpPyServer: null,     // For brython.
+            wsPyServer: null,       // For brython.
             tcpServer: null,
             tcpjsServer: null,
             cliServer: null,
@@ -321,7 +325,8 @@ class CmdSrv extends Hsm {
                             onEntry: (ctx, e)=>{ 
                                 this.state('conn_root')
 
-                                ctx.expressApp = express(),
+                                // For main react-based web application.
+                                ctx.expressApp = express()
                                 ctx.httpServer = http.createServer(ctx.expressApp);
                                 ctx.httpServer.listen(HTTP_PORT)
                                 ctx.wsServer = new WebSocket.Server({server: ctx.httpServer});
@@ -330,10 +335,23 @@ class CmdSrv extends Hsm {
                                     // Must not use raise() since it is a callback called asynchronously.
                                     this.send(new WsConnected(this.name, ws))
                                 })
-
                                 let app = ctx.expressApp
                                 app.get('/hello', function(req, res){ res.type('text/plain'); res.send('Hello World!!!');});
                                 app.use(express.static('../public'))
+
+                                // For brython (browser python) web application.
+                                ctx.expressPyApp = express()
+                                ctx.httpPyServer = http.createServer(ctx.expressPyApp);
+                                ctx.httpPyServer.listen(HTTP_PORT_PY)
+                                ctx.wsPyServer = new WebSocket.Server({server: ctx.httpPyServer});
+                                ctx.wsPyServer.on('connection', (ws, req)=>{ 
+                                    this.log(`ws connected from ${req.headers['x-forwarded-for'] || req.connection.remoteAddress}`)
+                                    // Must not use raise() since it is a callback called asynchronously.
+                                    this.send(new WsConnected(this.name, ws))
+                                })
+                                let pyApp = ctx.expressPyApp
+                                pyApp.get('/hello', function(req, res){ res.type('text/plain'); res.send('Hello World Python!!!');});
+                                pyApp.use(express.static('../public-python'))
 
                                 ctx.tcpServer = net.createServer()
                                 ctx.tcpServer.listen(TCP_PORT)
