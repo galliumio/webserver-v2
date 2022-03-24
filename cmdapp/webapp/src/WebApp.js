@@ -274,9 +274,9 @@ export class WebApp extends Hsm {
                                 this.state('loginWait')
                                 ctx.model.disableUi = true
                                 this.update()
-                                // Test only - disable ssl (use 'http' and 'ws' instead).
-                                let url = window.location.href.replace(/^https/, 'wss')
-                                //let url = window.location.href.replace(/^http/, 'ws')
+                                // It works for both http and https, since 'http' will be relaced with 'ws'
+                                // and 'https' will be replaced with 'wss'.
+                                let url = window.location.href.replace(/^http/, 'ws')
                                 this.sendReq(new WsCtrlOpenReq(url, ctx.model.username, ctx.model.password), 'WsCtrl')
                                 ctx.loginTimer.start(LOGIN_TIMEOUT_MS)
                             },
