@@ -11,15 +11,11 @@
   "license": "GPL-3.0",
   "dependencies": {
     "setimmediate": "^1.0.5",
-    "tiny-emitter": "^2.0.2",
-    "xstate": "^4.15.4"
+    "tiny-emitter": "^2.1.0",
+    "xstate": "^4.30.6"
   },
   "devDependencies": {
-    "babel-cli": "^6.26.0",
-    "babel-core": "^6.26.3",
-    "babel-loader": "^7.1.5",
-    "babel-preset-env": "^1.7.0",
-    "babel-preset-react": "^6.24.1",
-    "babel-preset-stage-0": "^6.24.1"
+    "@babel/cli": "^7.17.6",
+    "@babel/preset-env": "^7.16.11"
   }
 }

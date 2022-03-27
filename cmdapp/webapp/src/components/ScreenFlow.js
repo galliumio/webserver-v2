@@ -37,26 +37,26 @@
  ******************************************************************************/
 
 import React from 'react'
-import Button from '@material-ui/core/Button'
-import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles'
-import blue from '@material-ui/core/colors/blue'
-import red from '@material-ui/core/colors/red'
+import Button from '@mui/material/Button'
+import { ThemeProvider, StyledEngineProvider, createTheme, adaptV4Theme } from '@mui/material/styles';
 
 import {LoginScreen, LoginButtonClicked} from './LoginScreen.js'
 import {MainScreen} from './MainScreen.js'
 
+import { blue, red } from '@mui/material/colors';
+
 let {Evt, ErrorEvt} = require("../../../../galliumstudio/lib/index.js")
 
-const theme = createMuiTheme({
+const theme = createTheme(adaptV4Theme({
     typography: {
         useNextVariants: true,
     },
     palette: {
-        type: 'light',
+        mode: 'light',
         primary: blue,
         secondary: red
     }
-})
+}))
 
 // Internal events
 class TestButtonClicked extends Evt {
@@ -88,9 +88,11 @@ export function ScreenFlow({hsm, hsm:{ctx:{model}}}) {
         }
     }
     return (
-        <MuiThemeProvider theme={theme}>  
-            {getScreen()}
-        </MuiThemeProvider>
-    )
+        <StyledEngineProvider injectFirst>
+            <ThemeProvider theme={theme}>  
+                {getScreen()}
+            </ThemeProvider>
+        </StyledEngineProvider>
+    );
 }
 

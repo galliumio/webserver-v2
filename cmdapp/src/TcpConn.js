@@ -43,8 +43,6 @@ let {TcpConnStartReq, TcpConnStartCfm, TcpConnStopReq, TcpConnStopCfm, TcpConnUs
 let {SrvAuthCfmMsg, SrvPingCfmMsg, SRV_PING_PERIOD_MS} = require('../msg/SrvMsgInterface.js')    
 let {createMessageFromBuffer} = require('../msg/MsgFactory.js')
 let net = require('net')
-var ref = require('ref')
-var StructType = require('ref-struct')
 
 const STARTING_TIMEOUT_MS = 100
 const STOPPING_TIMEOUT_MS = 100

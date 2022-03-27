@@ -10,16 +10,13 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.16.4",
-    "ref-struct": "^1.1.0",
-    "ws": "^6.1.2"
+    "express": "^4.17.3",
+    "ws": "^8.5.0"
   },
   "devDependencies": {
-    "babel-cli": "^6.26.0",
-    "babel-core": "^6.26.3",
-    "babel-loader": "^7.1.5",
-    "babel-preset-env": "^1.7.0",
-    "babel-preset-react": "^6.24.1",
-    "babel-preset-stage-0": "^6.24.1"
+    "@babel/cli": "^7.17.6",
+    "@babel/core": "^7.17.8",
+    "babel-loader": "^8.2.4",
+    "@babel/preset-env": "^7.16.11"
   }
 }

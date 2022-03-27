@@ -37,8 +37,8 @@
  ******************************************************************************/
 
 import React, { useState } from 'react'
-import { makeStyles } from '@material-ui/core/styles'
-import TextField from '@material-ui/core/TextField'
+import makeStyles from '@mui/styles/makeStyles';
+import TextField from '@mui/material/TextField'
 import { ColorPicker } from "./ColorPicker.js";
 
 const useStyles = makeStyles((theme) => ({
@@ -69,12 +69,12 @@ export function ColorTextInput({hsm, label, data, onChange}) {
     }
     return (
         <div className={classes.container}>
-            <TextField label={label} multiline rowsMax={4} fullWidth
+            <TextField label={label} multiline maxRows={4} fullWidth
                 value={text} onChange={handleTextChange} variant="outlined" />
             <div className={classes.colorContainer}>
                 <ColorPicker hsm={hsm} label="Foreground Color" color={fgColor} onChange={handleFgColorChange} />
                 <ColorPicker hsm={hsm} label="Background Color" color={bgColor} onChange={handleBgColorChange} />
             </div>
         </div>
-    )
+    );
 }
