@@ -30360,7 +30360,7 @@ function withinMaxClamp(min, value, max) {
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 /*******************************************************************************
- * Copyright (C) Gallium Studio LLC. All rights reserved.
+ * Copyright (C) 2018 Gallium Studio LLC (Lawrence Lo). All rights reserved.
  *
  * This program is open source software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as published
@@ -30502,7 +30502,7 @@ module.exports = {
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 /*******************************************************************************
- * Copyright (C) Gallium Studio LLC. All rights reserved.
+ * Copyright (C) 2018 Gallium Studio LLC (Lawrence Lo). All rights reserved.
  *
  * This program is open source software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as published
@@ -30711,7 +30711,7 @@ module.exports = {
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 /*******************************************************************************
- * Copyright (C) Gallium Studio LLC. All rights reserved.
+ * Copyright (C) 2018 Gallium Studio LLC (Lawrence Lo). All rights reserved.
  *
  * This program is open source software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as published
@@ -31019,7 +31019,7 @@ function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Re
 function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
 
 /*******************************************************************************
- * Copyright (C) Gallium Studio LLC. All rights reserved.
+ * Copyright (C) 2018 Gallium Studio LLC (Lawrence Lo). All rights reserved.
  *
  * This program is open source software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as published
@@ -31195,7 +31195,7 @@ function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Re
 function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
 
 /*******************************************************************************
- * Copyright (C) Gallium Studio LLC. All rights reserved.
+ * Copyright (C) 2018 Gallium Studio LLC (Lawrence Lo). All rights reserved.
  *
  * This program is open source software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as published
@@ -31951,7 +31951,7 @@ function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Re
 function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
 
 /*******************************************************************************
- * Copyright (C) Gallium Studio LLC. All rights reserved.
+ * Copyright (C) 2018 Gallium Studio LLC (Lawrence Lo). All rights reserved.
  *
  * This program is open source software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as published
@@ -32111,7 +32111,7 @@ function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Re
 function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
 
 /*******************************************************************************
- * Copyright (C) Gallium Studio LLC. All rights reserved.
+ * Copyright (C) 2018 Gallium Studio LLC (Lawrence Lo). All rights reserved.
  *
  * This program is open source software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as published
@@ -32790,7 +32790,7 @@ function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Re
 function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
 
 /*******************************************************************************
- * Copyright (C) Gallium Studio LLC. All rights reserved.
+ * Copyright (C) 2018 Gallium Studio LLC (Lawrence Lo). All rights reserved.
  *
  * This program is open source software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as published
@@ -33077,7 +33077,7 @@ function _iterableToArrayLimit(arr, i) { var _i = arr == null ? null : typeof Sy
 function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
 /*******************************************************************************
- * Copyright (C) Gallium Studio LLC. All rights reserved.
+ * Copyright (C) 2018 Gallium Studio LLC (Lawrence Lo). All rights reserved.
  *
  * This program is open source software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as published
@@ -33215,7 +33215,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _mui_material_TextField__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @mui/material/TextField */ "./node_modules/@mui/material/TextField/TextField.js");
 /* harmony import */ var _ColorPicker_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./ColorPicker.js */ "./src/components/ColorPicker.js");
 /*******************************************************************************
- * Copyright (C) Gallium Studio LLC. All rights reserved.
+ * Copyright (C) 2018 Gallium Studio LLC (Lawrence Lo). All rights reserved.
  *
  * This program is open source software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as published
@@ -33358,7 +33358,7 @@ function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Re
 function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
 
 /*******************************************************************************
- * Copyright (C) Gallium Studio LLC. All rights reserved.
+ * Copyright (C) 2018 Gallium Studio LLC (Lawrence Lo). All rights reserved.
  *
  * This program is open source software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as published
@@ -33509,7 +33509,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _mui_styles_makeStyles__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @mui/styles/makeStyles */ "./node_modules/@mui/styles/makeStyles/makeStyles.js");
 /* harmony import */ var _mui_material_Typography__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @mui/material/Typography */ "./node_modules/@mui/material/Typography/Typography.js");
 /*******************************************************************************
- * Copyright (C) Gallium Studio LLC. All rights reserved.
+ * Copyright (C) 2018 Gallium Studio LLC (Lawrence Lo). All rights reserved.
  *
  * This program is open source software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as published
@@ -33642,7 +33642,7 @@ function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Re
 function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
 
 /*******************************************************************************
- * Copyright (C) Gallium Studio LLC. All rights reserved.
+ * Copyright (C) 2018 Gallium Studio LLC (Lawrence Lo). All rights reserved.
  *
  * This program is open source software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as published
@@ -33892,7 +33892,7 @@ function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Re
 function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
 
 /*******************************************************************************
- * Copyright (C) Gallium Studio LLC. All rights reserved.
+ * Copyright (C) 2018 Gallium Studio LLC (Lawrence Lo). All rights reserved.
  *
  * This program is open source software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as published
@@ -34098,7 +34098,7 @@ function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Re
 function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
 
 /*******************************************************************************
- * Copyright (C) Gallium Studio LLC. All rights reserved.
+ * Copyright (C) 2018 Gallium Studio LLC (Lawrence Lo). All rights reserved.
  *
  * This program is open source software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as published
@@ -34334,7 +34334,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _mui_material_Typography__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @mui/material/Typography */ "./node_modules/@mui/material/Typography/Typography.js");
 /* harmony import */ var _SortedTable_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./SortedTable.js */ "./src/components/SortedTable.js");
 /*******************************************************************************
- * Copyright (C) Gallium Studio LLC. All rights reserved.
+ * Copyright (C) 2018 Gallium Studio LLC (Lawrence Lo). All rights reserved.
  *
  * This program is open source software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as published
@@ -34492,7 +34492,7 @@ function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToAr
 function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
 /*******************************************************************************
- * Copyright (C) Gallium Studio LLC. All rights reserved.
+ * Copyright (C) 2018 Gallium Studio LLC (Lawrence Lo). All rights reserved.
  *
  * This program is open source software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as published
@@ -34656,7 +34656,7 @@ function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Re
 function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
 
 /*******************************************************************************
- * Copyright (C) Gallium Studio LLC. All rights reserved.
+ * Copyright (C) 2018 Gallium Studio LLC (Lawrence Lo). All rights reserved.
  *
  * This program is open source software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as published
@@ -34815,7 +34815,7 @@ function _iterableToArrayLimit(arr, i) { var _i = arr == null ? null : typeof Sy
 function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
 /*******************************************************************************
- * Copyright (C) Gallium Studio LLC. All rights reserved.
+ * Copyright (C) 2018 Gallium Studio LLC (Lawrence Lo). All rights reserved.
  *
  * This program is open source software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as published
@@ -35109,7 +35109,7 @@ function SortedTable(_ref2) {
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 /*******************************************************************************
- * Copyright (C) Gallium Studio LLC. All rights reserved.
+ * Copyright (C) 2018 Gallium Studio LLC (Lawrence Lo). All rights reserved.
  *
  * This program is open source software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as published
@@ -35250,7 +35250,7 @@ module.exports = {
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 /*******************************************************************************
- * Copyright (C) Gallium Studio LLC. All rights reserved.
+ * Copyright (C) 2018 Gallium Studio LLC (Lawrence Lo). All rights reserved.
  *
  * This program is open source software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as published
@@ -35366,7 +35366,7 @@ module.exports = {
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 /*******************************************************************************
- * Copyright (C) Gallium Studio LLC. All rights reserved.
+ * Copyright (C) 2018 Gallium Studio LLC (Lawrence Lo). All rights reserved.
  *
  * This program is open source software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as published
@@ -35500,7 +35500,7 @@ module.exports = {
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 /*******************************************************************************
- * Copyright (C) Gallium Studio LLC. All rights reserved.
+ * Copyright (C) 2018 Gallium Studio LLC (Lawrence Lo). All rights reserved.
  *
  * This program is open source software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as published
@@ -35634,7 +35634,7 @@ module.exports = {
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 /*******************************************************************************
- * Copyright (C) Gallium Studio LLC. All rights reserved.
+ * Copyright (C) 2018 Gallium Studio LLC (Lawrence Lo). All rights reserved.
  *
  * This program is open source software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as published
@@ -35980,7 +35980,7 @@ module.exports = {
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 /*******************************************************************************
- * Copyright (C) Gallium Studio LLC. All rights reserved.
+ * Copyright (C) 2018 Gallium Studio LLC (Lawrence Lo). All rights reserved.
  *
  * This program is open source software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as published
@@ -36122,7 +36122,7 @@ module.exports = {
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 /*******************************************************************************
- * Copyright (C) Gallium Studio LLC. All rights reserved.
+ * Copyright (C) 2018 Gallium Studio LLC (Lawrence Lo). All rights reserved.
  *
  * This program is open source software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as published
@@ -36346,7 +36346,7 @@ module.exports = {
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 /*******************************************************************************
- * Copyright (C) Gallium Studio LLC. All rights reserved.
+ * Copyright (C) 2018 Gallium Studio LLC (Lawrence Lo). All rights reserved.
  *
  * This program is open source software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as published
@@ -36456,7 +36456,7 @@ module.exports = {
 
 "use strict";
 /*******************************************************************************
- * Copyright (C) Gallium Studio LLC. All rights reserved.
+ * Copyright (C) 2018 Gallium Studio LLC (Lawrence Lo). All rights reserved.
  *
  * This program is open source software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as published
@@ -106585,7 +106585,7 @@ var __webpack_exports__ = {};
   !*** ./src/index.js ***!
   \**********************/
 /*******************************************************************************
- * Copyright (C) Gallium Studio LLC. All rights reserved.
+ * Copyright (C) 2018 Gallium Studio LLC (Lawrence Lo). All rights reserved.
  *
  * This program is open source software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as published
