@@ -36,7 +36,7 @@
  * Email - admin@galliumstudio.com
  ******************************************************************************/
 
-let {Evt, ErrorEvt, Msg, fw, FW, Hsm, Timer, BufReader, BufWriter} = require("../../galliumstudio/lib/index.js")
+let {Evt, ErrorEvt, Msg, fw, FW, Hsm, Timer, BufReader, BufWriter} = require("../../galliumio/lib/index.js")
 let {CmdSrvAuthReq, CmdSrvAuthCfm} = require("./CmdSrvInterface.js")
 let {TcpjsConnStartReq, TcpjsConnStartCfm, TcpjsConnStopReq, TcpjsConnStopCfm, TcpjsConnUseReq, TcpjsConnUseCfm,
      TcpjsConnDoneInd, TcpjsConnMsgInd} = require("./TcpjsConnInterface.js")

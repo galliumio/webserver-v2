@@ -45,7 +45,7 @@ import {MainScreen} from './MainScreen.js'
 
 import { blue, red } from '@mui/material/colors';
 
-let {Evt, ErrorEvt} = require("../../../../galliumstudio/lib/index.js")
+let {Evt, ErrorEvt} = require("../../../../galliumio/lib/index.js")
 
 const theme = createTheme(adaptV4Theme({
     typography: {

@@ -45,7 +45,7 @@ import {MainStatusTab} from './MainStatusTab'
 import {MainConsoleTab} from './MainConsoleTab'
 import {MainSensorTab} from './MainSensorTab'
 import {MainLedPanelTab} from './MainLedPanelTab'
-let {Evt, ErrorEvt} = require("../../../../galliumstudio/lib/index.js")
+let {Evt, ErrorEvt} = require("../../../../galliumio/lib/index.js")
 
 const useStyles = makeStyles((theme) => ({
     root: {

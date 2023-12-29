@@ -36,7 +36,7 @@
  * Email - admin@galliumstudio.com
  ******************************************************************************/
 
-let {Msg, fw} = require("../../galliumstudio/lib/index.js")
+let {Msg, fw} = require("../../galliumio/lib/index.js")
 let {SrvAuthReqMsg, SrvPingReqMsg} = require('../msg/SrvMsgInterface.js')      
 let {DispTickerReqMsg, DispTickerCfmMsg} = require('../msg/DispMsgInterface.js')   
 let {SensorControlReqMsg, SensorControlCfmMsg, SensorDataIndMsg, SensorDataRspMsg} = require('../msg/SensorMsgInterface.js')   

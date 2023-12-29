@@ -36,7 +36,7 @@
  * Email - admin@galliumstudio.com
  ******************************************************************************/
 
-let {fw, FW, log} = require("../../galliumstudio/lib/index.js")
+let {fw, FW, log} = require("../../galliumio/lib/index.js")
 let {CmdSrv} = require("./CmdSrv.js")
 let {WsConn} = require("./WsConn.js")
 let {TcpConn} = require("./TcpConn.js")

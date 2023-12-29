@@ -1,5 +1,5 @@
 {
-  "name": "galliumstudio",
+  "name": "galliumio",
   "version": "0.0.4",
   "description": "An event framework for statecharts.",
   "main": "lib/index.js",

@@ -36,9 +36,9 @@
  * Email - admin@galliumstudio.com
  ******************************************************************************/
 
-let {fw, FW} = require("../../../galliumstudio/lib/Fw.js")
-let {Evt} = require("../../../galliumstudio/lib/Evt.js")
-let {Timer} = require("../../../galliumstudio/lib/Timer.js")
+let {fw, FW} = require("../../../galliumio/lib/Fw.js")
+let {Evt} = require("../../../galliumio/lib/Evt.js")
+let {Timer} = require("../../../galliumio/lib/Timer.js")
 
 // Webpack specific
 import Worker from './WTimer.worker.js';

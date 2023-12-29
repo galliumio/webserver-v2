@@ -36,6 +36,6 @@
  * Email - admin@galliumstudio.com
  ******************************************************************************/
 
-let {FW, fw, Msg, ErrorMsg, BufWriter} = require("../../galliumstudio/lib/index.js")
+let {FW, fw, Msg, ErrorMsg, BufWriter} = require("../../galliumio/lib/index.js")
 
 // Message interface for the "Node" role.

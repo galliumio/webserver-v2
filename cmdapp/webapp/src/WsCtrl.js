@@ -36,7 +36,7 @@
  * Email - admin@galliumstudio.com
  ******************************************************************************/
 
-let {Evt, ErrorEvt, fw, FW, Hsm, Timer} = require("../../../galliumstudio/lib/index.js")
+let {Evt, ErrorEvt, fw, FW, Hsm, Timer} = require("../../../galliumio/lib/index.js")
 let {WsCtrlStartReq, WsCtrlStartCfm, WsCtrlStopReq, WsCtrlStopCfm, WsCtrlOpenReq, WsCtrlOpenCfm,
     WsCtrlCloseReq, WsCtrlCloseCfm, WsCtrlCloseInd, WsCtrlMsgInd} = require("./WsCtrlInterface.js")
 let {SrvAuthReqMsg, SrvAuthCfmMsg, SrvPingReqMsg, SrvPingCfmMsg, SRV_PING_PERIOD_MS} = require('../../msg/SrvMsgInterface.js')

@@ -41,7 +41,7 @@ import { render } from 'react-dom'
 import {ScreenFlow} from './components/ScreenFlow'
 import {MAIN_TAB} from './components/MainScreen'
 
-let {Evt, ErrorEvt, fw, FW, Hsm, Timer, log} = require("../../../galliumstudio/lib/index.js")
+let {Evt, ErrorEvt, fw, FW, Hsm, Timer, log} = require("../../../galliumio/lib/index.js")
 let {WebAppStartReq, WebAppStartCfm, WebAppStopReq, WebAppStopCfm} = require("./WebAppInterface.js")
 let {WsCtrlStartReq, WsCtrlStartCfm, WsCtrlStopReq, WsCtrlStopCfm, WsCtrlOpenReq, WsCtrlOpenCfm, 
     WsCtrlCloseReq, WsCtrlCloseCfm, WsCtrlCloseInd, WsCtrlMsgReq, WsCtrlMsgInd} = require("./WsCtrlInterface.js")
