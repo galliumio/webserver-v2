@@ -41,7 +41,7 @@ import makeStyles from '@mui/styles/makeStyles';
 import TextField from '@mui/material/TextField'
 import Button from '@mui/material/Button'
 
-let {Evt, ErrorEvt} = require("../../../../galliumio/lib/index.js")
+let {Evt, ErrorEvt} = require("../../../../galliumstudio/lib/index.js")
 
 const useStyles = makeStyles((theme) => ({
     button: {

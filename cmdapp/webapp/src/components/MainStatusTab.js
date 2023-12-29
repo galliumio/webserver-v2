@@ -40,7 +40,7 @@ import React from 'react'
 import makeStyles from '@mui/styles/makeStyles';
 import Typography from '@mui/material/Typography'
 import {SortedTable} from './SortedTable.js'
-let {Evt, ErrorEvt} = require("../../../../galliumio/lib/index.js")
+let {Evt, ErrorEvt} = require("../../../../galliumstudio/lib/index.js")
 
 const useStyles = makeStyles((theme) => ({
 }))

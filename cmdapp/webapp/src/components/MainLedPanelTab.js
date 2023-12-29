@@ -43,7 +43,7 @@ import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button'
 import {ColorTextInput} from './ColorTextInput.js'
 
-let {Evt, ErrorEvt} = require("../../../../galliumio/lib/index.js")
+let {Evt, ErrorEvt} = require("../../../../galliumstudio/lib/index.js")
 
 const useStyles = makeStyles((theme) => ({
     root: {

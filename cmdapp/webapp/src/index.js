@@ -36,7 +36,7 @@
  * Email - admin@galliumstudio.com
  ******************************************************************************/
 
-let {fw, FW, log} = require("../../../galliumio/lib/index.js")
+let {fw, FW, log} = require("../../../galliumstudio/lib/index.js")
 let {WebApp} = require("./WebApp.js")
 let {WsCtrl} = require("./WsCtrl.js")
 let {WebAppStartReq, WebAppStopReq} = require("./WebAppInterface.js")

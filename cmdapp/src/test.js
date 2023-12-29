@@ -36,7 +36,7 @@
  * Email - admin@galliumstudio.com
  ******************************************************************************/
 
-let {Evt, ErrorEvt, fw, FW, Hsm} = require("../../galliumio/lib/index.js")
+let {Evt, ErrorEvt, fw, FW, Hsm} = require("../../galliumstudio/lib/index.js")
 let { interpret } = require('xstate/lib/interpreter')
 
 e1 = new Evt("HelloReq", "SysMgr", "Main", 12)

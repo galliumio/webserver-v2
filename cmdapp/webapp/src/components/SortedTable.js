@@ -59,7 +59,7 @@ import Tooltip from '@mui/material/Tooltip';
 import DeleteIcon from '@mui/icons-material/Delete';
 import FilterListIcon from '@mui/icons-material/FilterList';
 
-let {Evt, ErrorEvt} = require("../../../../galliumio/lib/index.js")
+let {Evt, ErrorEvt} = require("../../../../galliumstudio/lib/index.js")
 
 const useStyles = makeStyles((theme) => ({
     root: {

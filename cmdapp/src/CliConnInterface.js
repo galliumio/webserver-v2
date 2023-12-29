@@ -36,7 +36,7 @@
  * Email - admin@galliumstudio.com
  ******************************************************************************/
 
-let {Evt, ErrorEvt, FW} = require("../../galliumio/lib/index.js")
+let {Evt, ErrorEvt, FW} = require("../../galliumstudio/lib/index.js")
 
 class CliConnStartReq extends Evt {
     constructor(to = FW.UNDEF, from = FW.UNDEF, seq = 0) {
