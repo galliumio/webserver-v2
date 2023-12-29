@@ -40,21 +40,21 @@ var __webpack_exports__ = {};
  * Source repository - https://github.com/galliumstudio
  * Email - admin@galliumstudio.com
  ******************************************************************************/
+
 // Timer ID for clearing it. Should be local to each worker instance.
 var id = null;
 var periodic = false;
 addEventListener("message", function (event) {
   var _event$data = event.data,
-      operation = _event$data.operation,
-      timeoutMs = _event$data.timeoutMs,
-      isPeriodic = _event$data.isPeriodic,
-      seq = _event$data.seq;
-
+    operation = _event$data.operation,
+    timeoutMs = _event$data.timeoutMs,
+    isPeriodic = _event$data.isPeriodic,
+    seq = _event$data.seq;
   if (operation === 'start') {
     //start(timeoutMs, isPeriodic, seq)
     stop();
-    periodic = isPeriodic; // postMessage can only be called within addEventListener for a worker.
-
+    periodic = isPeriodic;
+    // postMessage can only be called within addEventListener for a worker.
     if (periodic) {
       id = setInterval(function () {
         postMessage(seq);
@@ -68,7 +68,6 @@ addEventListener("message", function (event) {
     stop();
   }
 });
-
 function stop() {
   if (id !== null) {
     if (periodic) {
@@ -76,7 +75,6 @@ function stop() {
     } else {
       clearTimeout(id);
     }
-
     id = null;
   }
 }
