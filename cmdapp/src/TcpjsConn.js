@@ -92,15 +92,14 @@ class TcpjsConn extends Hsm {
             initial: 'stopped',
             on: { 
                 TcpjsConnStartReq: {
-                    actions: (ctx, e)=> { 
+                    actions: ({context: ctx, event: e})=> { 
                         this.event(e)
                         this.sendCfm(new TcpjsConnStartCfm(FW.ERROR_STATE, this.name), e)
                     }
                 },
                 TcpjsConnStopReq: {
-                    target: 'stopping',
-                    internal: true,
-                    actions: (ctx, e)=>{
+                    target: '#stopping',
+                    actions: ({context: ctx, event: e})=>{
                         this.event(e)
                         ctx.savedStopReq = e
                     }
@@ -108,17 +107,17 @@ class TcpjsConn extends Hsm {
             },
             states: {
                 stopped: {
-                    onEntry: (ctx, e)=>{ this.state('stopped') },
+                    entry: ({context: ctx, event: e})=>{ this.state('stopped') },
                     on: { 
                         TcpjsConnStopReq: {
-                            actions: (ctx, e)=> { 
+                            actions: ({context: ctx, event: e})=> { 
                                 this.event(e)
                                 this.sendCfm(new TcpjsConnStopCfm(), e)
                             }
                         },
                         TcpjsConnStartReq: {
                             target: 'starting',
-                            actions: (ctx, e)=> { 
+                            actions: ({context: ctx, event: e})=> { 
                                 this.event(e)
                                 ctx.savedStartReq = e
                             }
@@ -126,69 +125,70 @@ class TcpjsConn extends Hsm {
                     },
                 },
                 starting: {
-                    onEntry: (ctx, e)=>{ 
+                    entry: ({context: ctx, event: e})=>{ 
                         this.state('starting')
                         ctx.startingTimer.start(STARTING_TIMEOUT_MS)
                         // @todo Initialization
                         this.raise(new Evt('Done'))
                     },
-                    onExit: (ctx, e)=>{ 
+                    exit: ({context: ctx, event: e})=>{ 
                         ctx.startingTimer.stop()
                     },
                     on: { 
                         StartingTimer: {
-                            target: 'stopping',
-                            actions: (ctx, e)=> { 
+                            target: '#stopping',
+                            actions: ({context: ctx, event: e})=> { 
                                 this.event(e)
                                 this.sendCfm(new TcpjsConnStartCfm(FW.ERROR_TIMEOUT, this.name), ctx.savedStartReq)
                             }
                         },
                         Fail: {
-                            target: 'stopping',
-                            actions: (ctx, e)=> { 
+                            target: '#stopping',
+                            actions: ({context: ctx, event: e})=> { 
                                 this.event(e)
                                 this.sendCfm(new TcpjsConnStartCfm(e.error, e.origin, e.reason), ctx.savedStartReq)
                             }
                         },
                         Done: {
                             target: 'started',
-                            actions: (ctx, e)=> { 
+                            actions: ({context: ctx, event: e})=> { 
                                 this.sendCfm(new TcpjsConnStartCfm(FW.ERROR_SUCCESS), ctx.savedStartReq)
                             }
                         }
                     },
                 }, 
                 stopping: {
-                    onEntry: (ctx, e)=>{ 
+                    id: 'stopping',
+                    entry: ({context: ctx, event: e})=>{ 
                         this.state('stopping') 
                         ctx.stoppingTimer.start(STOPPING_TIMEOUT_MS)
                         this.raise(new Evt('Done'))
                     },
-                    onExit: (ctx, e)=>{ 
+                    exit: ({context: ctx, event: e})=>{ 
                         ctx.stoppingTimer.stop()
                         this.recall()
                     },
                     on: { 
                         StoppingTimer: {
-                            actions: (ctx, e)=> { 
+                            actions: ({context: ctx, event: e})=> { 
                                 this.event(e)
                                 fw.assert(0)
                             }
                         },
                         Fail: {
-                            actions: (ctx, e)=> { 
+                            actions: ({context: ctx, event: e})=> { 
                                 this.event(e)
                                 fw.assert(0)
                             }
                         },
                         Done: {
                             target: 'stopped',
-                            actions: (ctx, e)=> { 
+                            actions: ({context: ctx, event: e})=> { 
                                 this.sendCfm(new TcpjsConnStopCfm(FW.ERROR_SUCCESS), ctx.savedStopReq)
                             }
                         },
                         TcpjsConnStopReq: {
-                            actions: (ctx, e)=>{
+                            actions: ({context: ctx, event: e})=>{
                                 this.event(e)
                                 this.defer(e)
                             }
@@ -197,11 +197,11 @@ class TcpjsConn extends Hsm {
                 },                    
                 started: {
                     initial: 'idle',
-                    onEntry: (ctx, e)=>{ this.state('started') },
+                    entry: ({context: ctx, event: e})=>{ this.state('started') },
                     states: {
                         idle: {
                             id: 'idle',
-                            onEntry: (ctx, e)=>{ 
+                            entry: ({context: ctx, event: e})=>{ 
                                 this.state('idle')
                                 ctx.user = null
                                 ctx.username = null
@@ -210,7 +210,7 @@ class TcpjsConn extends Hsm {
                             on: { 
                                 TcpjsConnUseReq: {
                                     target: 'connected',
-                                    actions: (ctx, e)=> { 
+                                    actions: ({context: ctx, event: e})=> { 
                                         this.event(e)
                                         ctx.user = e.from
                                         ctx.sock = e.sock    
@@ -221,7 +221,7 @@ class TcpjsConn extends Hsm {
                         },
                         connected: {
                             initial: 'unauth',
-                            onEntry: (ctx, e)=>{
+                            entry: ({context: ctx, event: e})=>{
                                 this.state('connected')
                                 ctx.error = null
                                 ctx.savedLine = ''
@@ -252,7 +252,7 @@ class TcpjsConn extends Hsm {
                             },
                             on: {
                                 SockOnError: {
-                                    actions: (ctx, e)=> {
+                                    actions: ({context: ctx, event: e})=> {
                                         this.closeSock()
                                     }
                                 }
@@ -260,7 +260,7 @@ class TcpjsConn extends Hsm {
                             on: {
                                 SockOnClosed: {
                                     target: '#idle',
-                                    actions: (ctx, e)=> {
+                                    actions: ({context: ctx, event: e})=> {
                                         this.event(e)
                                         this.sendInd(new TcpjsConnDoneInd(ctx.error || FW.ERROR_NETWORK, this.name, FW.REASON_UNSPEC, ctx.nodeId), ctx.user)
                                     }
@@ -269,16 +269,16 @@ class TcpjsConn extends Hsm {
                             states: {
                                 unauth: {
                                     id: 'unauth',
-                                    onEntry: (ctx, e)=>{
+                                    entry: ({context: ctx, event: e})=>{
                                         this.state('auth_unauth')
                                         ctx.authTimer.start(AUTH_TIMEOUT_MS)
                                     },
-                                    onExit: (ctx, e)=>{
+                                    exit: ({context: ctx, event: e})=>{
                                         ctx.authTimer.stop()
                                     },
                                     on: {
                                         AuthTimer: {
-                                            actions: (ctx, e)=> {
+                                            actions: ({context: ctx, event: e})=> {
                                                 this.event(e)
                                                 ctx.error = FW.ERROR_TIMEOUT
                                                 this.closeSock()
@@ -286,13 +286,13 @@ class TcpjsConn extends Hsm {
                                         },
                                         AuthDone: {
                                             target: '#authenticated',
-                                            actions: (ctx, e)=> {
+                                            actions: ({context: ctx, event: e})=> {
                                                 this.event(e)                            
                                             }
                                         },
                                         SockOnMessage: {
-                                            cond: (ctx, e)=>(e.msg.type == 'SrvAuthReqMsg'),
-                                            actions: (ctx, e)=>{
+                                            guard: ({context: ctx, event: e})=>(e.msg.type == 'SrvAuthReqMsg'),
+                                            actions: ({context: ctx, event: e})=>{
                                                 this.event(e)
                                                 this.log('SockOnMessage: ', e.msg)
                                                 ctx.savedAuthReqMsg = e.msg
@@ -300,8 +300,8 @@ class TcpjsConn extends Hsm {
                                             }
                                         },
                                         CmdSrvAuthCfm: {
-                                            cond: (ctx, e)=>this.matchSeq(e),
-                                            actions: (ctx, e)=>{
+                                            guard: ({context: ctx, event: e})=>this.matchSeq(e),
+                                            actions: ({context: ctx, event: e})=>{
                                                 this.event(e)
                                                 let reqMsg = ctx.savedAuthReqMsg
                                                 if (e.error == FW.ERROR_SUCCESS) {
@@ -320,19 +320,19 @@ class TcpjsConn extends Hsm {
                                 },
                                 authenticated: {
                                     id: 'authenticated',
-                                    onEntry: (ctx, e)=>{
+                                    entry: ({context: ctx, event: e})=>{
                                         this.state('auth_authenticated')
                                         ctx.pingWaitTimer.start(PING_WAIT_TIMEOUT_MS, true)
                                         ctx.pingCnt = 0 
                                         // Test only.
                                         ctx.testTimer.start(TEST_TIMEOUT_MS, false)
                                     },
-                                    onExit: (ctx, e)=>{
+                                    exit: ({context: ctx, event: e})=>{
                                         ctx.pingWaitTimer.stop()
                                     },
                                     on: {
                                         PingWaitTimer: {
-                                            actions: (ctx, e)=> {
+                                            actions: ({context: ctx, event: e})=> {
                                                 this.event(e)
                                                 if (ctx.pingCnt > 0) {
                                                     ctx.pingCnt = 0
@@ -345,20 +345,20 @@ class TcpjsConn extends Hsm {
                                         // Test only.
                                         ///*
                                         TestTimer: {
-                                            actions: (ctx, e)=> {
+                                            actions: ({context: ctx, event: e})=> {
                                                 this.event(e)
                                                 this.sendReqMsg(new DispTickerReqMsg({text:'abc', fgColor:{r:0,g:0,b:0}, bgColor:{r:0,g:0,b:0}}, 0), ctx.nodeId)
                                             }
                                         },
                                         //*/
                                         TcpjsConnMsgReq: {
-                                            actions: (ctx, e)=> {
+                                            actions: ({context: ctx, event: e})=> {
                                                 this.event(e)
                                                 this.postMsg(e.msg)
                                             }
                                         },
                                         SockOnMessage: {
-                                            actions: (ctx, e)=>{
+                                            actions: ({context: ctx, event: e})=>{
                                                 this.event(e)
                                                 //this.log('SockOnMessage: ', e.msg)
                                                 if (e.msg.type == 'SrvPingReqMsg') {

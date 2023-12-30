@@ -96,15 +96,14 @@ class TcpConn extends Hsm {
             initial: 'stopped',
             on: { 
                 TcpConnStartReq: {
-                    actions: (ctx, e)=> { 
+                    actions: ({context: ctx, event: e})=> { 
                         this.event(e)
                         this.sendCfm(new TcpConnStartCfm(FW.ERROR_STATE, this.name), e)
                     }
                 },
                 TcpConnStopReq: {
-                    target: 'stopping',
-                    internal: true,
-                    actions: (ctx, e)=>{
+                    target: '#stopping',
+                    actions: ({context: ctx, event: e})=>{
                         this.event(e)
                         ctx.savedStopReq = e
                     }
@@ -112,17 +111,17 @@ class TcpConn extends Hsm {
             },
             states: {
                 stopped: {
-                    onEntry: (ctx, e)=>{ this.state('stopped') },
+                    entry: ({context: ctx, event: e})=>{ this.state('stopped') },
                     on: { 
                         TcpConnStopReq: {
-                            actions: (ctx, e)=> { 
+                            actions: ({context: ctx, event: e})=> { 
                                 this.event(e)
                                 this.sendCfm(new TcpConnStopCfm(), e)
                             }
                         },
                         TcpConnStartReq: {
                             target: 'starting',
-                            actions: (ctx, e)=> { 
+                            actions: ({context: ctx, event: e})=> { 
                                 this.event(e)
                                 ctx.savedStartReq = e
                             }
@@ -130,69 +129,70 @@ class TcpConn extends Hsm {
                     },
                 },
                 starting: {
-                    onEntry: (ctx, e)=>{ 
+                    entry: ({context: ctx, event: e})=>{ 
                         this.state('starting')
                         ctx.startingTimer.start(STARTING_TIMEOUT_MS)
                         // @todo Initialization
                         this.raise(new Evt('Done'))
                     },
-                    onExit: (ctx, e)=>{ 
+                    exit: ({context: ctx, event: e})=>{ 
                         ctx.startingTimer.stop()
                     },
                     on: { 
                         StartingTimer: {
-                            target: 'stopping',
-                            actions: (ctx, e)=> { 
+                            target: '#stopping',
+                            actions: ({context: ctx, event: e})=> { 
                                 this.event(e)
                                 this.sendCfm(new TcpConnStartCfm(FW.ERROR_TIMEOUT, this.name), ctx.savedStartReq)
                             }
                         },
                         Fail: {
-                            target: 'stopping',
-                            actions: (ctx, e)=> { 
+                            target: '#stopping',
+                            actions: ({context: ctx, event: e})=> { 
                                 this.event(e)
                                 this.sendCfm(new TcpConnStartCfm(e.error, e.origin, e.reason), ctx.savedStartReq)
                             }
                         },
                         Done: {
                             target: 'started',
-                            actions: (ctx, e)=> { 
+                            actions: ({context: ctx, event: e})=> { 
                                 this.sendCfm(new TcpConnStartCfm(FW.ERROR_SUCCESS), ctx.savedStartReq)
                             }
                         }
                     },
                 }, 
                 stopping: {
-                    onEntry: (ctx, e)=>{ 
+                    id: 'stopping',
+                    entry: ({context: ctx, event: e})=>{ 
                         this.state('stopping') 
                         ctx.stoppingTimer.start(STOPPING_TIMEOUT_MS)
                         this.raise(new Evt('Done'))
                     },
-                    onExit: (ctx, e)=>{ 
+                    exit: ({context: ctx, event: e})=>{ 
                         ctx.stoppingTimer.stop()
                         this.recall()
                     },
                     on: { 
                         StoppingTimer: {
-                            actions: (ctx, e)=> { 
+                            actions: ({context: ctx, event: e})=> { 
                                 this.event(e)
                                 fw.assert(0)
                             }
                         },
                         Fail: {
-                            actions: (ctx, e)=> { 
+                            actions: ({context: ctx, event: e})=> { 
                                 this.event(e)
                                 fw.assert(0)
                             }
                         },
                         Done: {
                             target: 'stopped',
-                            actions: (ctx, e)=> { 
+                            actions: ({context: ctx, event: e})=> { 
                                 this.sendCfm(new TcpConnStopCfm(FW.ERROR_SUCCESS), ctx.savedStopReq)
                             }
                         },
                         TcpConnStopReq: {
-                            actions: (ctx, e)=>{
+                            actions: ({context: ctx, event: e})=>{
                                 this.event(e)
                                 this.defer(e)
                             }
@@ -201,11 +201,11 @@ class TcpConn extends Hsm {
                 },                    
                 started: {
                     initial: 'idle',
-                    onEntry: (ctx, e)=>{ this.state('started') },
+                    entry: ({context: ctx, event: e})=>{ this.state('started') },
                     states: {
                         idle: {
                             id: 'idle',
-                            onEntry: (ctx, e)=>{ 
+                            entry: ({context: ctx, event: e})=>{ 
                                 this.state('idle')
                                 ctx.user = null
                                 ctx.username = null
@@ -214,7 +214,7 @@ class TcpConn extends Hsm {
                             on: { 
                                 TcpConnUseReq: {
                                     target: 'connected',
-                                    actions: (ctx, e)=> { 
+                                    actions: ({context: ctx, event: e})=> { 
                                         this.event(e)
                                         ctx.user = e.from
                                         ctx.sock = e.sock    
@@ -225,7 +225,7 @@ class TcpConn extends Hsm {
                         },
                         connected: {
                             type: 'parallel',
-                            onEntry: (ctx, e)=>{
+                            entry: ({context: ctx, event: e})=>{
                                 this.state('connected')
                                 ctx.error = null
                                 ctx.sock.on('data', (buffer)=>{
@@ -243,7 +243,7 @@ class TcpConn extends Hsm {
                             },
                             on: {
                                 SockOnError: {
-                                    actions: (ctx, e)=> {
+                                    actions: ({context: ctx, event: e})=> {
                                         this.closeSock()
                                     }
                                 }
@@ -251,7 +251,7 @@ class TcpConn extends Hsm {
                             on: {
                                 SockOnClosed: {
                                     target: '#idle',
-                                    actions: (ctx, e)=> {
+                                    actions: ({context: ctx, event: e})=> {
                                         this.event(e)
                                         this.sendInd(new TcpConnDoneInd(ctx.error || FW.ERROR_NETWORK, this.name, FW.REASON_UNSPEC, ctx.nodeId), ctx.user)
                                     }
@@ -264,16 +264,16 @@ class TcpConn extends Hsm {
                                     states: {
                                         unauth: {
                                             id: 'unauth',
-                                            onEntry: (ctx, e)=>{
+                                            entry: ({context: ctx, event: e})=>{
                                                 this.state('auth_unauth')
                                                 ctx.authTimer.start(AUTH_TIMEOUT_MS)
                                             },
-                                            onExit: (ctx, e)=>{
+                                            exit: ({context: ctx, event: e})=>{
                                                 ctx.authTimer.stop()
                                             },
                                             on: {
                                                 AuthTimer: {
-                                                    actions: (ctx, e)=> {
+                                                    actions: ({context: ctx, event: e})=> {
                                                         this.event(e)
                                                         ctx.error = FW.ERROR_TIMEOUT
                                                         this.closeSock()
@@ -281,13 +281,13 @@ class TcpConn extends Hsm {
                                                 },
                                                 AuthDone: {
                                                     target: '#authenticated',
-                                                    actions: (ctx, e)=> {
+                                                    actions: ({context: ctx, event: e})=> {
                                                         this.event(e)                            
                                                     }
                                                 },
                                                 SockOnMessage: {
-                                                    cond: (ctx, e)=>(e.msg.type == 'SrvAuthReqMsg'),
-                                                    actions: (ctx, e)=>{
+                                                    guard: ({context: ctx, event: e})=>(e.msg.type == 'SrvAuthReqMsg'),
+                                                    actions: ({context: ctx, event: e})=>{
                                                         this.event(e)
                                                         this.log('SockOnMessage: ', e.msg)
                                                         ctx.savedAuthReqMsg = e.msg
@@ -295,8 +295,8 @@ class TcpConn extends Hsm {
                                                     }
                                                 },
                                                 CmdSrvAuthCfm: {
-                                                    cond: (ctx, e)=>this.matchSeq(e),
-                                                    actions: (ctx, e)=>{
+                                                    guard: ({context: ctx, event: e})=>this.matchSeq(e),
+                                                    actions: ({context: ctx, event: e})=>{
                                                         this.event(e)
                                                         let reqMsg = ctx.savedAuthReqMsg
                                                         if (e.error == FW.ERROR_SUCCESS) {
@@ -315,17 +315,17 @@ class TcpConn extends Hsm {
                                         },
                                         authenticated: {
                                             id: 'authenticated',
-                                            onEntry: (ctx, e)=>{
+                                            entry: ({context: ctx, event: e})=>{
                                                 this.state('auth_authenticated')
                                                 ctx.pingWaitTimer.start(PING_WAIT_TIMEOUT_MS, true)
                                                 ctx.pingCnt = 0 
                                             },
-                                            onExit: (ctx, e)=>{
+                                            exit: ({context: ctx, event: e})=>{
                                                 ctx.pingWaitTimer.stop()
                                             },
                                             on: {
                                                 PingWaitTimer: {
-                                                    actions: (ctx, e)=> {
+                                                    actions: ({context: ctx, event: e})=> {
                                                         this.event(e)
                                                         if (ctx.pingCnt > 0) {
                                                             ctx.pingCnt = 0
@@ -336,13 +336,13 @@ class TcpConn extends Hsm {
                                                     }
                                                 },
                                                 TcpConnMsgReq: {
-                                                    actions: (ctx, e)=> {
+                                                    actions: ({context: ctx, event: e})=> {
                                                         this.event(e)
                                                         this.postMsg(e.msg)
                                                     }
                                                 },
                                                 SockOnMessage: {
-                                                    actions: (ctx, e)=>{
+                                                    actions: ({context: ctx, event: e})=>{
                                                         this.event(e)
                                                         //this.log('SockOnMessage: ', e.msg)
                                                         if (e.msg.type == 'SrvPingReqMsg') {
@@ -359,7 +359,7 @@ class TcpConn extends Hsm {
                                 msg: {
                                     id: 'msg',
                                     initial: 'msgIdle',
-                                    onEntry: (ctx, e)=>{
+                                    entry: ({context: ctx, event: e})=>{
                                         //ctx.msgBuf = null
                                         ctx.msgLen = 0
                                         ctx.msgType = ''
@@ -367,29 +367,26 @@ class TcpConn extends Hsm {
                                     on: {
                                         MsgDone: {
                                             target: '#msgIdle',
-                                            internal: true,
-                                            actions: (ctx, e)=> { this.event(e) }
+                                            actions: ({context: ctx, event: e})=> { this.event(e) }
                                         },
                                         CheckMsgHdr: {
                                             target: '#headerWait',
-                                            internal: true,
-                                            actions: (ctx, e)=> { this.event(e) }
+                                            actions: ({context: ctx, event: e})=> { this.event(e) }
                                         },
                                         CheckMsgBody: {
                                             target: '#bodyWait',
-                                            internal: true,
-                                            actions: (ctx, e)=> { this.event(e) }
+                                            actions: ({context: ctx, event: e})=> { this.event(e) }
                                         },
                                     },
                                     states: {
                                         msgIdle: {
                                             id: 'msgIdle',
-                                            onEntry: (ctx, e)=>{
+                                            entry: ({context: ctx, event: e})=>{
                                                 this.state('msg_msgIdle')
                                             },
                                             on: {
                                                 SockOnData: {
-                                                    actions: (ctx, e)=>{
+                                                    actions: ({context: ctx, event: e})=>{
                                                         this.event(e)
                                                         //this.log('SockOnData: ', e.buffer)
                                                         ctx.msgBuf = e.buffer
@@ -400,7 +397,7 @@ class TcpConn extends Hsm {
                                         },
                                         headerWait: {
                                             id: 'headerWait',
-                                            onEntry: (ctx, e)=>{
+                                            entry: ({context: ctx, event: e})=>{
                                                 this.state('msg_headerWait')
                                                 let msg = new Msg
                                                 if (ctx.msgBuf.length >= msg.bufferSize()) {
@@ -422,7 +419,7 @@ class TcpConn extends Hsm {
                                             },
                                             on: {
                                                 SockOnData: {
-                                                    actions: (ctx, e)=>{
+                                                    actions: ({context: ctx, event: e})=>{
                                                         this.event(e)
                                                         //this.log('SockOnData: ', e.buffer)
                                                         ctx.msgBuf = Buffer.concat([ctx.msgBuf, e.buffer])
@@ -435,7 +432,7 @@ class TcpConn extends Hsm {
                                         },
                                         bodyWait: {
                                             id: 'bodyWait',
-                                            onEntry: (ctx, e)=>{
+                                            entry: ({context: ctx, event: e})=>{
                                                 this.state('msg_bodyWait')
                                                 this.log(`msg hdr: len=${ctx.msgLen}', type=${ctx.msgType}`)
                                                 let msg = new Msg
@@ -460,7 +457,7 @@ class TcpConn extends Hsm {
                                             },
                                             on: {
                                                 SockOnData: {
-                                                    actions: (ctx, e)=>{
+                                                    actions: ({context: ctx, event: e})=>{
                                                         this.event(e)
                                                         //this.log('SockOnData: ', e.buffer)
                                                         ctx.msgBuf = Buffer.concat([ctx.msgBuf, e.buffer])

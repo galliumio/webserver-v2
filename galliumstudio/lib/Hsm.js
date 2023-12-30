@@ -37,8 +37,7 @@
  ******************************************************************************/
 
 require("setimmediate")     // Attaches to global scope.
-let {Machine, actions} = require("xstate")
-let {interpret} = require('xstate/lib/interpreter')
+let {createMachine, createActor} = require("xstate")
 let Emitter = require('tiny-emitter');
 let {fw, FW} = require("./Fw.js")
 let {Evt, ErrorEvt} = require("./Evt.js")
@@ -59,8 +58,8 @@ class Hsm {
         this.stateMap = new Map()   // Map of current states of all regions
 
         config.context = ctx
-        this.machine = Machine(config)
-        this.interpreter = interpret(this.machine)
+        this.machine = createMachine(config)
+        this.interpreter = createActor(this.machine)
         this.emitter = new Emitter()
         this.handler = (e)=>{
             // Polyfill works for node and browsers.
@@ -88,7 +87,7 @@ class Hsm {
     start() {
         fw.add(this)
         log.on(this.name)
-        this.interpreter.init()
+        this.interpreter.start()
     }
     genSeq() { 
         let seq = this.nextSeq++

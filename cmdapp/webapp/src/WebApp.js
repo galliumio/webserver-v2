@@ -94,15 +94,14 @@ export class WebApp extends Hsm {
             initial: 'stopped',
             on: { 
                 WebAppStartReq: {
-                    actions: (ctx, e)=> { 
+                    actions: ({context: ctx, event: e})=> { 
                         this.event(e)
                         this.sendCfm(new WebAppStartCfm(FW.ERROR_STATE, this.name), e)
                     }
                 },
                 WebAppStopReq: {
-                    target: 'stopping',
-                    internal: true,
-                    actions: (ctx, e)=>{
+                    target: '#stopping',
+                    actions: ({context: ctx, event: e})=>{
                         this.event(e)
                         ctx.savedStopReq = e
                     }
@@ -110,19 +109,19 @@ export class WebApp extends Hsm {
             },
             states: {
                 stopped: {
-                    onEntry: (ctx, e)=>{ 
+                    entry: ({context: ctx, event: e})=>{ 
                         this.state('stopped') 
                     },
                     on: { 
                         WebAppStopReq: {
-                            actions: (ctx, e)=> { 
+                            actions: ({context: ctx, event: e})=> { 
                                 this.event(e)
                                 this.sendCfm(new WebAppStopCfm(), e)
                             }
                         },
                         WebAppStartReq: {
                             target: 'starting',
-                            actions: (ctx, e)=> { 
+                            actions: ({context: ctx, event: e})=> { 
                                 this.event(e)
                                 ctx.savedStartReq = e
                             }
@@ -130,38 +129,38 @@ export class WebApp extends Hsm {
                     },
                 },
                 starting: {
-                    onEntry: (ctx, e)=>{ 
+                    entry: ({context: ctx, event: e})=>{ 
                         this.state('starting')
                         ctx.startingTimer.start(STARTING_TIMEOUT_MS)
                         this.sendReq(new WsCtrlStartReq(), 'WsCtrl')
                     },
-                    onExit: (ctx, e)=>{ 
+                    exit: ({context: ctx, event: e})=>{ 
                         ctx.startingTimer.stop()
                     },
                     on: { 
                         StartingTimer: {
-                            target: 'stopping',
-                            actions: (ctx, e)=> { 
+                            target: '#stopping',
+                            actions: ({context: ctx, event: e})=> { 
                                 this.event(e)
                                 this.sendCfm(new WebAppStartCfm(FW.ERROR_TIMEOUT, this.name), ctx.savedStartReq)
                             }
                         },
                         Fail: {
-                            target: 'stopping',
-                            actions: (ctx, e)=> { 
+                            target: '#stopping',
+                            actions: ({context: ctx, event: e})=> { 
                                 this.event(e)
                                 this.sendCfm(new WebAppStartCfm(e.error, e.origin, e.reason), ctx.savedStartReq)
                             }
                         },
                         Done: {
                             target: 'started',
-                            actions: (ctx, e)=> { 
+                            actions: ({context: ctx, event: e})=> { 
                                 this.sendCfm(new WebAppStartCfm(FW.ERROR_SUCCESS), ctx.savedStartReq)
                             }
                         },
                         WsCtrlStartCfm: {
-                            cond: (ctx, e)=>this.matchSeq(e),
-                            actions: (ctx, e)=>{
+                            guard: ({context: ctx, event: e})=>this.matchSeq(e),
+                            actions: ({context: ctx, event: e})=>{
                                 this.event(e)
                                 if (e.error !== FW.ERROR_SUCCESS) {
                                     this.raise(new Fail(e.error, e.origin, e.reason))
@@ -175,37 +174,38 @@ export class WebApp extends Hsm {
                     },
                 }, 
                 stopping: {
-                    onEntry: (ctx, e)=>{ 
+                    id: 'stopping',
+                    entry: ({context: ctx, event: e})=>{ 
                         this.state('stopping') 
                         ctx.stoppingTimer.start(STOPPING_TIMEOUT_MS)
                         this.sendReq(new WsCtrlStopReq(), 'WsCtrl')
                     },
-                    onExit: (ctx, e)=>{ 
+                    exit: ({context: ctx, event: e})=>{ 
                         ctx.stoppingTimer.stop()
                         this.recall()
                     },
                     on: { 
                         StoppingTimer: {
-                            actions: (ctx, e)=> { 
+                            actions: ({context: ctx, event: e})=> { 
                                 this.event(e)
                                 fw.assert(0)
                             }
                         },
                         Fail: {
-                            actions: (ctx, e)=> { 
+                            actions: ({context: ctx, event: e})=> { 
                                 this.event(e)
                                 fw.assert(0)
                             }
                         },
                         Done: {
                             target: 'stopped',
-                            actions: (ctx, e)=> { 
+                            actions: ({context: ctx, event: e})=> { 
                                 this.sendCfm(new WebAppStopCfm(FW.ERROR_SUCCESS), ctx.savedStopReq)
                             }
                         },
                         WsCtrlStopCfm: {
-                            cond: (ctx, e)=>this.matchSeq(e),
-                            actions: (ctx, e)=>{
+                            guard: ({context: ctx, event: e})=>this.matchSeq(e),
+                            actions: ({context: ctx, event: e})=>{
                                 this.event(e)
                                 if (e.error !== FW.ERROR_SUCCESS) {
                                     this.raise(new Fail(e.error, e.origin, e.reason))
@@ -217,7 +217,7 @@ export class WebApp extends Hsm {
                             }
                         },
                         WebAppStopReq: {
-                            actions: (ctx, e)=>{
+                            actions: ({context: ctx, event: e})=>{
                                 this.event(e)
                                 this.defer(e)
                             }
@@ -226,16 +226,16 @@ export class WebApp extends Hsm {
                 },
                 started: {
                     initial: 'login',
-                    onEntry: (ctx, e)=>{ 
+                    entry: ({context: ctx, event: e})=>{ 
                         this.state('started')
                         this.update()
                      },
-                     onExit: (ctx, e)=>{ 
+                     exit: ({context: ctx, event: e})=>{ 
                         this.sendReq(new WsCtrlCloseReq(), 'WsCtrl')
                      },
                      on: { 
                         TestButtonClicked: {
-                            actions: (ctx, e)=> { 
+                            actions: ({context: ctx, event: e})=> { 
                                 this.event(e)
                                 ctx.model.testButtonClickCnt++
                                 this.update()
@@ -243,8 +243,7 @@ export class WebApp extends Hsm {
                         },
                         WsCtrlCloseInd: {
                             target: '#login',
-                            internal: true,
-                            actions: (ctx, e)=> { 
+                            actions: ({context: ctx, event: e})=> { 
                                 this.event(e)
                             }
                         },
@@ -252,7 +251,7 @@ export class WebApp extends Hsm {
                     states: {
                         login: {
                             id: 'login',
-                            onEntry: (ctx, e)=>{ 
+                            entry: ({context: ctx, event: e})=>{ 
                                 this.state('login')
                                 ctx.model.screen = 'login'
                                 this.update()
@@ -260,7 +259,7 @@ export class WebApp extends Hsm {
                             on: {
                                 LoginButtonClicked: {
                                     target: 'loginWait',
-                                    actions: (ctx, e)=>{
+                                    actions: ({context: ctx, event: e})=>{
                                         this.event(e)
                                         this.log(`${e.username} ${e.password}`)
                                         ctx.model.username = e.username
@@ -270,7 +269,7 @@ export class WebApp extends Hsm {
                             }
                         },
                         loginWait: {
-                            onEntry: (ctx, e)=>{ 
+                            entry: ({context: ctx, event: e})=>{ 
                                 this.state('loginWait')
                                 ctx.model.disableUi = true
                                 this.update()
@@ -280,7 +279,7 @@ export class WebApp extends Hsm {
                                 this.sendReq(new WsCtrlOpenReq(url, ctx.model.username, ctx.model.password), 'WsCtrl')
                                 ctx.loginTimer.start(LOGIN_TIMEOUT_MS)
                             },
-                            onExit: (ctx, e)=>{ 
+                            exit: ({context: ctx, event: e})=>{ 
                                 ctx.loginTimer.stop()
                                 ctx.model.disableUi = false
                                 this.update()
@@ -288,28 +287,28 @@ export class WebApp extends Hsm {
                             on: { 
                                 WsCtrlOpenCfm: [
                                     {
-                                        cond: (ctx, e)=>this.matchSeq(e) && (e.error != FW.ERROR_SUCCESS),
+                                        guard: ({context: ctx, event: e})=>this.matchSeq(e) && (e.error != FW.ERROR_SUCCESS),
                                         target: 'retryWait',
-                                        actions: (ctx, e)=>{ this.event(e) }
+                                        actions: ({context: ctx, event: e})=>{ this.event(e) }
                                     },
                                     {
-                                        cond: (ctx, e)=>this.matchSeq(e) && (e.error == FW.ERROR_SUCCESS),
+                                        guard: ({context: ctx, event: e})=>this.matchSeq(e) && (e.error == FW.ERROR_SUCCESS),
                                         target: 'connected',
-                                        actions: (ctx, e)=>{ this.event(e) }
+                                        actions: ({context: ctx, event: e})=>{ this.event(e) }
                                     }
                                 ],
                                 LoginTimer: {
                                     target: 'retryWait',
-                                    actions: (ctx, e)=>{ this.event(e) }
+                                    actions: ({context: ctx, event: e})=>{ this.event(e) }
                                 },
                             }
                         },
                         retryWait: {
-                            onEntry: (ctx, e)=>{ 
+                            entry: ({context: ctx, event: e})=>{ 
                                 this.state('retryWait')
                                 ctx.retryTimer.start(RETRY_TIMEOUT_MS)
                             },
-                            onExit: (ctx, e)=>{ 
+                            exit: ({context: ctx, event: e})=>{ 
                                 ctx.retryTimer.stop()
                              },
                             on: { 
@@ -318,7 +317,7 @@ export class WebApp extends Hsm {
                         },
                         connected: {
                             initial: 'statusTab',
-                            onEntry: (ctx, e)=>{ 
+                            entry: ({context: ctx, event: e})=>{ 
                                 this.state('connected')
                                 ctx.model.screen = 'main'
                                 ctx.model.mainStatusData = []
@@ -328,34 +327,29 @@ export class WebApp extends Hsm {
                             on: {
                                 MainTabChanged: [
                                     {
-                                        cond: (ctx, e)=>(e.index == MAIN_TAB.STATUS),
-                                        internal: true,
+                                        guard: ({context: ctx, event: e})=>(e.index == MAIN_TAB.STATUS),
                                         target: '#statusTab',
-                                        actions: (ctx, e)=>{ this.event(e) }
+                                        actions: ({context: ctx, event: e})=>{ this.event(e) }
                                     },
                                     {
-                                        cond: (ctx, e)=>(e.index == MAIN_TAB.CONSOLE),
-                                        internal: true,
+                                        guard: ({context: ctx, event: e})=>(e.index == MAIN_TAB.CONSOLE),
                                         target: '#consoleTab',
-                                        actions: (ctx, e)=>{ this.event(e) }
+                                        actions: ({context: ctx, event: e})=>{ this.event(e) }
                                     },
                                     {
-                                        cond: (ctx, e)=>(e.index == MAIN_TAB.SENSOR),
-                                        internal: true,
+                                        guard: ({context: ctx, event: e})=>(e.index == MAIN_TAB.SENSOR),
                                         target: '#sensorTab',
-                                        actions: (ctx, e)=>{ this.event(e) }
+                                        actions: ({context: ctx, event: e})=>{ this.event(e) }
                                     },
                                     {
-                                        cond: (ctx, e)=>(e.index == MAIN_TAB.LED_PANEL),
-                                        internal: true,
+                                        guard: ({context: ctx, event: e})=>(e.index == MAIN_TAB.LED_PANEL),
                                         target: '#ledPanelTab',
-                                        actions: (ctx, e)=>{ this.event(e) }
+                                        actions: ({context: ctx, event: e})=>{ this.event(e) }
                                     },
                                 ],
                                 WsCtrlMsgInd: {
-                                    cond: (ctx, e)=>(e.msg.type == 'SrvConnStsIndMsg'),
-                                    internal: true,
-                                    actions: (ctx, e)=>{ 
+                                    guard: ({context: ctx, event: e})=>(e.msg.type == 'SrvConnStsIndMsg'),
+                                    actions: ({context: ctx, event: e})=>{ 
                                         this.event(e)
                                         this.log(`Received ${e.msg.type}:`)
                                         this.log(e.msg)
@@ -372,7 +366,7 @@ export class WebApp extends Hsm {
                             states: {
                                 statusTab: {
                                     id: 'statusTab',
-                                    onEntry: (ctx, e)=>{
+                                    entry: ({context: ctx, event: e})=>{
                                         this.state('statusTab')
                                         ctx.model.mainTabIndex = MAIN_TAB.STATUS
                                         this.update()
@@ -380,7 +374,7 @@ export class WebApp extends Hsm {
                                 },
                                 consoleTab: {
                                     id: 'consoleTab',
-                                    onEntry: (ctx, e)=>{
+                                    entry: ({context: ctx, event: e})=>{
                                         this.state('consoleTab')
                                         ctx.model.mainTabIndex = MAIN_TAB.CONSOLE
                                         this.update()
@@ -388,7 +382,7 @@ export class WebApp extends Hsm {
                                 },
                                 sensorTab: {
                                     id: 'sensorTab',
-                                    onEntry: (ctx, e)=>{
+                                    entry: ({context: ctx, event: e})=>{
                                         this.state('sensorTab')
                                         ctx.model.mainTabIndex = MAIN_TAB.SENSOR
                                         ctx.model.sensorData.clear()
@@ -396,7 +390,7 @@ export class WebApp extends Hsm {
                                     },
                                     on: {
                                         SensorSendClicked: {
-                                            actions: (ctx, e)=>{
+                                            actions: ({context: ctx, event: e})=>{
                                                 this.event(e)
                                                 this.log(e.nodes)
                                                 let seq = 0;
@@ -410,9 +404,8 @@ export class WebApp extends Hsm {
                                             }
                                         },
                                         WsCtrlMsgInd: {
-                                            cond: (ctx, e)=>(e.msg.type == 'SensorDataIndMsg'),
-                                            internal: true,
-                                            actions: (ctx, e)=>{ 
+                                            guard: ({context: ctx, event: e})=>(e.msg.type == 'SensorDataIndMsg'),
+                                            actions: ({context: ctx, event: e})=>{ 
                                                 this.event(e)
                                                 const m = e.msg
                                                 this.log(`Received ${m.type}:`)
@@ -427,7 +420,7 @@ export class WebApp extends Hsm {
                                 lebPanelTab: {
                                     id: 'ledPanelTab',
                                     initial: 'ledPanelIdle',
-                                    onEntry: (ctx, e)=>{
+                                    entry: ({context: ctx, event: e})=>{
                                         this.state('ledPanelTab')
                                         ctx.model.mainTabIndex = MAIN_TAB.LED_PANEL
                                         this.update()
@@ -435,14 +428,13 @@ export class WebApp extends Hsm {
                                     states: {
                                         ledPanelIdle: {
                                             id: 'ledPanelIdle',
-                                            onEntry: (ctx, e)=>{
+                                            entry: ({context: ctx, event: e})=>{
                                                 this.state('ledPanelIdle')
                                             },
                                             on: {
                                                 LedPanelSendClicked: {
                                                     target: '#ledPanelSending',
-                                                    internal: true,
-                                                    actions: (ctx, e)=>{
+                                                    actions: ({context: ctx, event: e})=>{
                                                         this.event(e)
                                                         this.log(e.nodes)
                                                         // Remeber 'reference' to event parameters (not deep copy).
@@ -455,7 +447,7 @@ export class WebApp extends Hsm {
                                         },
                                         ledPanelSending: {
                                             id: 'ledPanelSending',
-                                            onEntry: (ctx, e)=>{
+                                            entry: ({context: ctx, event: e})=>{
                                                 this.state('ledPanelSending')
                                                 ctx.waitTimer.start(LED_PANEL_WAIT_TIMEOUT_MS)
                                                 this.resetSeq(['LedPanel'])
@@ -466,13 +458,13 @@ export class WebApp extends Hsm {
                                                 })
                                                 ctx.tickerIdx++
                                             },
-                                            onExit: (ctx, e)=>{
+                                            exit: ({context: ctx, event: e})=>{
                                                 ctx.waitTimer.stop();
                                             },
                                             on: {
                                                 WsCtrlMsgInd: {
-                                                    cond: (ctx, e)=>(e.msg.type == 'DispTickerCfmMsg'),
-                                                    actions: (ctx, e)=>{
+                                                    guard: ({context: ctx, event: e})=>(e.msg.type == 'DispTickerCfmMsg'),
+                                                    actions: ({context: ctx, event: e})=>{
                                                         this.event(e)
                                                         if (this.clearSeq(e.msg, 'LedPanel')) {
                                                             this.raise(new Evt('Done'))
@@ -480,7 +472,7 @@ export class WebApp extends Hsm {
                                                     }
                                                 },
                                                 WaitTimer: {
-                                                    actions: (ctx, e)=> { 
+                                                    actions: ({context: ctx, event: e})=> { 
                                                         this.event(e)
                                                         this.error("Missing DispTickerCfmMsg")
                                                         // @todo Prints out which node misses its cfm.
@@ -489,18 +481,17 @@ export class WebApp extends Hsm {
                                                 },
                                                 Done: [
                                                     {
-                                                        cond: (ctx, e)=>(ctx.tickerIdx >= ctx.tickerData.length),
+                                                        guard: ({context: ctx, event: e})=>(ctx.tickerIdx >= ctx.tickerData.length),
                                                         target: '#ledPanelIdle',
-                                                        internal: true,
-                                                        actions: (ctx, e)=>{
+                                                        actions: ({context: ctx, event: e})=>{
                                                             this.event(e)
                                                         }
                                                     },
                                                     {
-                                                        cond: (ctx, e)=>(ctx.tickerIdx < ctx.tickerData.length),
+                                                        guard: ({context: ctx, event: e})=>(ctx.tickerIdx < ctx.tickerData.length),
                                                         target: '#ledPanelSending',
                                                         // Self-transition must NOT be 'internal'.
-                                                        actions: (ctx, e)=>{
+                                                        actions: ({context: ctx, event: e})=>{
                                                             this.event(e)
                                                             this.log(`Done: idx = ${ctx.tickerIdx}, len = ${ctx.tickerData.length}`)
                                                         }

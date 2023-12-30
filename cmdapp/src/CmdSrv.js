@@ -144,15 +144,14 @@ class CmdSrv extends Hsm {
             initial: 'stopped',
             on: { 
                 CmdSrvStartReq: {
-                    actions: (ctx, e)=> { 
+                    actions: ({context: ctx, event: e})=> { 
                         this.event(e)
                         this.sendCfm(new CmdSrvStartCfm(FW.ERROR_STATE, this.name), e)
                     }
                 },
                 CmdSrvStopReq: {
-                    target: 'stopping',
-                    internal: true,
-                    actions: (ctx, e)=>{
+                    target: '#stopping',
+                    actions: ({context: ctx, event: e})=>{
                         this.event(e)
                         ctx.savedStopReq = e
                     }
@@ -160,7 +159,7 @@ class CmdSrv extends Hsm {
             },
             states: {
                 stopped: {
-                    onEntry: (ctx, e)=>{ 
+                    entry: ({context: ctx, event: e})=>{ 
                         this.state('stopped') 
                         ctx.wsConnList = {
                             free: [],
@@ -181,14 +180,14 @@ class CmdSrv extends Hsm {
                     },
                     on: { 
                         CmdSrvStopReq: {
-                            actions: (ctx, e)=> { 
+                            actions: ({context: ctx, event: e})=> { 
                                 this.event(e)
                                 this.sendCfm(new CmdSrvStopCfm(), e)
                             }
                         },
                         CmdSrvStartReq: {
                             target: 'starting',
-                            actions: (ctx, e)=> { 
+                            actions: ({context: ctx, event: e})=> { 
                                 this.event(e)
                                 ctx.savedStartReq = e
                             }
@@ -196,7 +195,7 @@ class CmdSrv extends Hsm {
                     },
                 },
                 starting: {
-                    onEntry: (ctx, e)=>{ 
+                    entry: ({context: ctx, event: e})=>{ 
                         this.state('starting')
                         ctx.startingTimer.start(STARTING_TIMEOUT_MS)
                         for (let i=0; i<APP.WS_CONN_CNT; i++) {
@@ -212,50 +211,51 @@ class CmdSrv extends Hsm {
                             this.sendReq(new CliConnStartReq(), app.cliConn(i))
                         }
                     },
-                    onExit: (ctx, e)=>{ 
+                    exit: ({context: ctx, event: e})=>{ 
                         ctx.startingTimer.stop()
                     },
                     on: { 
                         StartingTimer: {
-                            target: 'stopping',
-                            actions: (ctx, e)=> { 
+                            target: '#stopping',
+                            actions: ({context: ctx, event: e})=> { 
                                 this.event(e)
                                 this.sendCfm(new CmdSrvStartCfm(FW.ERROR_TIMEOUT, this.name), ctx.savedStartReq)
                             }
                         },
                         Fail: {
-                            target: 'stopping',
-                            actions: (ctx, e)=> { 
+                            target: '#stopping',
+                            actions: ({context: ctx, event: e})=> { 
                                 this.event(e)
                                 this.sendCfm(new CmdSrvStartCfm(e.error, e.origin, e.reason), ctx.savedStartReq)
                             }
                         },
                         Done: {
                             target: 'started',
-                            actions: (ctx, e)=> { 
+                            actions: ({context: ctx, event: e})=> { 
                                 this.sendCfm(new CmdSrvStartCfm(FW.ERROR_SUCCESS), ctx.savedStartReq)
                             }
                         },
                         WsConnStartCfm: {
-                            cond: (ctx, e)=>this.matchSeq(e),
-                            actions: (ctx, e)=>{ this.handleConnStartCfm(e, ctx.wsConnList) }
+                            guard: ({context: ctx, event: e})=>this.matchSeq(e),
+                            actions: ({context: ctx, event: e})=>{ this.handleConnStartCfm(e, ctx.wsConnList) }
                         },
                         TcpConnStartCfm: {
-                            cond: (ctx, e)=>this.matchSeq(e),
-                            actions: (ctx, e)=>{ this.handleConnStartCfm(e, ctx.tcpConnList) }
+                            guard: ({context: ctx, event: e})=>this.matchSeq(e),
+                            actions: ({context: ctx, event: e})=>{ this.handleConnStartCfm(e, ctx.tcpConnList) }
                         },
                         TcpjsConnStartCfm: {
-                            cond: (ctx, e)=>this.matchSeq(e),
-                            actions: (ctx, e)=>{ this.handleConnStartCfm(e, ctx.tcpjsConnList) }
+                            guard: ({context: ctx, event: e})=>this.matchSeq(e),
+                            actions: ({context: ctx, event: e})=>{ this.handleConnStartCfm(e, ctx.tcpjsConnList) }
                         },
                         CliConnStartCfm: {
-                            cond: (ctx, e)=>this.matchSeq(e),
-                            actions: (ctx, e)=>{ this.handleConnStartCfm(e, ctx.cliConnList) }
+                            guard: ({context: ctx, event: e})=>this.matchSeq(e),
+                            actions: ({context: ctx, event: e})=>{ this.handleConnStartCfm(e, ctx.cliConnList) }
                         }
                     },
                 }, 
                 stopping: {
-                    onEntry: (ctx, e)=>{ 
+                    id: 'stopping',
+                    entry: ({context: ctx, event: e})=>{ 
                         this.state('stopping') 
                         ctx.stoppingTimer.start(STOPPING_TIMEOUT_MS)
                         for (let i=0; i<APP.WS_CONN_CNT; i++) {
@@ -271,47 +271,47 @@ class CmdSrv extends Hsm {
                             this.sendReq(new CliConnStopReq(), app.cliConn(i))
                         }
                     },
-                    onExit: (ctx, e)=>{ 
+                    exit: ({context: ctx, event: e})=>{ 
                         ctx.stoppingTimer.stop()
                         this.recall()
                     },
                     on: { 
                         StoppingTimer: {
-                            actions: (ctx, e)=> { 
+                            actions: ({context: ctx, event: e})=> { 
                                 this.event(e)
                                 fw.assert(0)
                             }
                         },
                         Fail: {
-                            actions: (ctx, e)=> { 
+                            actions: ({context: ctx, event: e})=> { 
                                 this.event(e)
                                 fw.assert(0)
                             }
                         },
                         Done: {
                             target: 'stopped',
-                            actions: (ctx, e)=> { 
+                            actions: ({context: ctx, event: e})=> { 
                                 this.sendCfm(new CmdSrvStopCfm(FW.ERROR_SUCCESS), ctx.savedStopReq)
                             }
                         },
                         WsConnStopCfm: {
-                            cond: (ctx, e)=>this.matchSeq(e),
-                            actions: (ctx, e)=>{ this.handleConnStopCfm(e) }
+                            guard: ({context: ctx, event: e})=>this.matchSeq(e),
+                            actions: ({context: ctx, event: e})=>{ this.handleConnStopCfm(e) }
                         },
                         TcpConnStopCfm: {
-                            cond: (ctx, e)=>this.matchSeq(e),
-                            actions: (ctx, e)=>{ this.handleConnStopCfm(e) }
+                            guard: ({context: ctx, event: e})=>this.matchSeq(e),
+                            actions: ({context: ctx, event: e})=>{ this.handleConnStopCfm(e) }
                         },
                         TcpjsConnStopCfm: {
-                            cond: (ctx, e)=>this.matchSeq(e),
-                            actions: (ctx, e)=>{ this.handleConnStopCfm(e) }
+                            guard: ({context: ctx, event: e})=>this.matchSeq(e),
+                            actions: ({context: ctx, event: e})=>{ this.handleConnStopCfm(e) }
                         },
                         CliConnStopCfm: {
-                            cond: (ctx, e)=>this.matchSeq(e),
-                            actions: (ctx, e)=>{ this.handleConnStopCfm(e) }
+                            guard: ({context: ctx, event: e})=>this.matchSeq(e),
+                            actions: ({context: ctx, event: e})=>{ this.handleConnStopCfm(e) }
                         },
                         CmdSrvStopReq: {
-                            actions: (ctx, e)=>{
+                            actions: ({context: ctx, event: e})=>{
                                 this.event(e)
                                 this.defer(e)
                             }
@@ -322,7 +322,7 @@ class CmdSrv extends Hsm {
                     type: 'parallel',
                     states: {
                         conn_root: {
-                            onEntry: (ctx, e)=>{ 
+                            entry: ({context: ctx, event: e})=>{ 
                                 this.state('conn_root')
 
                                 // For main react-based web application.
@@ -377,7 +377,7 @@ class CmdSrv extends Hsm {
                             },
                             on: { 
                                 WsConnected: {
-                                    actions: (ctx, e)=> { 
+                                    actions: ({context: ctx, event: e})=> { 
                                         this.event(e)
                                         if (ctx.wsConnList.free.length == 0) {
                                             this.error('No wsConn availabled. Rejected')
@@ -392,7 +392,7 @@ class CmdSrv extends Hsm {
                                     }
                                 },
                                 WsConnDoneInd: {
-                                    actions: (ctx, e)=>{
+                                    actions: ({context: ctx, event: e})=>{
                                         this.event(e)
                                         arrayMove(ctx.wsConnList.busy, ctx.wsConnList.free, e.from)
                                         this.log(`busy wsConn = ${ctx.wsConnList.busy}`)
@@ -407,7 +407,7 @@ class CmdSrv extends Hsm {
                                     }
                                 },
                                 TcpConnected: {
-                                    actions: (ctx, e)=> { 
+                                    actions: ({context: ctx, event: e})=> { 
                                         this.event(e)
                                         if (ctx.tcpConnList.free.length == 0) {
                                             this.error('No tcpConn availabled. Rejected')
@@ -423,7 +423,7 @@ class CmdSrv extends Hsm {
                                     }
                                 },
                                 TcpConnDoneInd: {
-                                    actions: (ctx, e)=>{
+                                    actions: ({context: ctx, event: e})=>{
                                         this.event(e)
                                         arrayMove(ctx.tcpConnList.busy, ctx.tcpConnList.free, e.from)
                                         this.log(`busy tcpConn = ${ctx.tcpConnList.busy}`)
@@ -438,7 +438,7 @@ class CmdSrv extends Hsm {
                                     }
                                 },
                                 TcpjsConnected: {
-                                    actions: (ctx, e)=> { 
+                                    actions: ({context: ctx, event: e})=> { 
                                         this.event(e)
                                         if (ctx.tcpjsConnList.free.length == 0) {
                                             this.error('No tcpjsConn availabled. Rejected')
@@ -454,7 +454,7 @@ class CmdSrv extends Hsm {
                                     }
                                 },
                                 TcpjsConnDoneInd: {
-                                    actions: (ctx, e)=>{
+                                    actions: ({context: ctx, event: e})=>{
                                         this.event(e)
                                         arrayMove(ctx.tcpjsConnList.busy, ctx.tcpjsConnList.free, e.from)
                                         this.log(`busy tcpjsConn = ${ctx.tcpjsConnList.busy}`)
@@ -469,7 +469,7 @@ class CmdSrv extends Hsm {
                                     }
                                 },
                                 CliConnected: {
-                                    actions: (ctx, e)=> { 
+                                    actions: ({context: ctx, event: e})=> { 
                                         this.event(e)
                                         if (ctx.cliConnList.free.length == 0) {
                                             this.error('No cliConn availabled. Rejected')
@@ -485,7 +485,7 @@ class CmdSrv extends Hsm {
                                     }
                                 },
                                 CliConnDoneInd: {
-                                    actions: (ctx, e)=>{
+                                    actions: ({context: ctx, event: e})=>{
                                         this.event(e)
                                         arrayMove(ctx.cliConnList.busy, ctx.cliConnList.free, e.from)
                                         this.log(`busy cliConn = ${ctx.cliConnList.busy}`)
@@ -500,7 +500,7 @@ class CmdSrv extends Hsm {
                                     }
                                 },
                                 AuthSuccess: {
-                                    actions: (ctx, e)=>{
+                                    actions: ({context: ctx, event: e})=>{
                                         this.event(e)
                                         let {nodeId, hsm} = e.connSts
                                         this.log(e)
@@ -518,28 +518,28 @@ class CmdSrv extends Hsm {
                                     }
                                 },   
                                 WsConnMsgInd: {
-                                    actions: (ctx, e)=>{
+                                    actions: ({context: ctx, event: e})=>{
                                         this.event(e)
                                         this.log('WsConnMsgInd: ', e.msg)
                                         this.routeMsg(e.msg)
                                     }
                                 },
                                 TcpConnMsgInd: {
-                                    actions: (ctx, e)=>{
+                                    actions: ({context: ctx, event: e})=>{
                                         this.event(e)
                                         this.log('TcpConnMsgInd: ', e.msg)
                                         this.routeMsg(e.msg)
                                     }
                                 },     
                                 TcpjsConnMsgInd: {
-                                    actions: (ctx, e)=>{
+                                    actions: ({context: ctx, event: e})=>{
                                         this.event(e)
                                         this.log('TcpjsConnMsgInd: ', e.msg)
                                         this.routeMsg(e.msg)
                                     }
                                 },
                                 CliConnMsgInd: {
-                                    actions: (ctx, e)=>{
+                                    actions: ({context: ctx, event: e})=>{
                                         this.event(e)
                                         this.log('CliConnMsgInd: ', e.msg)
                                         this.routeMsg(e.msg)
@@ -549,19 +549,19 @@ class CmdSrv extends Hsm {
                         },
                         auth_root: {
                             initial: 'auth_idle',
-                            onEntry: (ctx, e)=>{ 
+                            entry: ({context: ctx, event: e})=>{ 
                                 this.state('auth_root')
                             },
                             states: {
                                 auth_idle: {
                                     id: 'auth_idle',
-                                    onEntry: (ctx, e)=>{ 
+                                    entry: ({context: ctx, event: e})=>{ 
                                         this.state('auth_idle')
                                     },
                                     on: {
                                         CmdSrvAuthReq: {
                                             target: '#auth_busy',
-                                            actions: (ctx, e)=>{
+                                            actions: ({context: ctx, event: e})=>{
                                                 this.event(e),
                                                 ctx.savedAuthReg = e
                                             }
@@ -570,7 +570,7 @@ class CmdSrv extends Hsm {
                                 },
                                 auth_busy: {
                                     id: 'auth_busy',
-                                    onEntry: (ctx, e)=>{ 
+                                    entry: ({context: ctx, event: e})=>{ 
                                         this.state('auth_busy')
                                         let req = ctx.savedAuthReg                                      
                                         if (this.checkCredential(req.username, req.password)) {
@@ -591,7 +591,7 @@ class CmdSrv extends Hsm {
                                         }
                                         this.raise(new Evt('AuthDone'))
                                     },
-                                    onExit: (ctx, e)=>{
+                                    exit: ({context: ctx, event: e})=>{
                                         this.recall('auth')
                                     },
                                     on: {
@@ -599,7 +599,7 @@ class CmdSrv extends Hsm {
                                             target: '#auth_idle'
                                         },
                                         CmdSrvAuthReq: {
-                                            actions: (ctx, e)=>{
+                                            actions: ({context: ctx, event: e})=>{
                                                 this.event(e),
                                                 this.defer(e, 'auth')
                                             }

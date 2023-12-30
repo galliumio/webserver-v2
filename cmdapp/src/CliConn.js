@@ -93,15 +93,14 @@ class CliConn extends Hsm {
             initial: 'stopped',
             on: { 
                 CliConnStartReq: {
-                    actions: (ctx, e)=> { 
+                    actions: ({context: ctx, event: e})=> { 
                         this.event(e)
                         this.sendCfm(new CliConnStartCfm(FW.ERROR_STATE, this.name), e)
                     }
                 },
                 CliConnStopReq: {
-                    target: 'stopping',
-                    internal: true,
-                    actions: (ctx, e)=>{
+                    target: '#stopping',
+                    actions: ({context: ctx, event: e})=>{
                         this.event(e)
                         ctx.savedStopReq = e
                     }
@@ -109,17 +108,17 @@ class CliConn extends Hsm {
             },
             states: {
                 stopped: {
-                    onEntry: (ctx, e)=>{ this.state('stopped') },
+                    entry: ({context: ctx, event: e})=>{ this.state('stopped') },
                     on: { 
                         CliConnStopReq: {
-                            actions: (ctx, e)=> { 
+                            actions: ({context: ctx, event: e})=> { 
                                 this.event(e)
                                 this.sendCfm(new CliConnStopCfm(), e)
                             }
                         },
                         CliConnStartReq: {
                             target: 'starting',
-                            actions: (ctx, e)=> { 
+                            actions: ({context: ctx, event: e})=> { 
                                 this.event(e)
                                 ctx.savedStartReq = e
                             }
@@ -127,69 +126,70 @@ class CliConn extends Hsm {
                     },
                 },
                 starting: {
-                    onEntry: (ctx, e)=>{ 
+                    entry: ({context: ctx, event: e})=>{ 
                         this.state('starting')
                         ctx.startingTimer.start(STARTING_TIMEOUT_MS)
                         // @todo Initialization
                         this.raise(new Evt('Done'))
                     },
-                    onExit: (ctx, e)=>{ 
+                    exit: ({context: ctx, event: e})=>{ 
                         ctx.startingTimer.stop()
                     },
                     on: { 
                         StartingTimer: {
-                            target: 'stopping',
-                            actions: (ctx, e)=> { 
+                            target: '#stopping',
+                            actions: ({context: ctx, event: e})=> { 
                                 this.event(e)
                                 this.sendCfm(new CliConnStartCfm(FW.ERROR_TIMEOUT, this.name), ctx.savedStartReq)
                             }
                         },
                         Fail: {
-                            target: 'stopping',
-                            actions: (ctx, e)=> { 
+                            target: '#stopping',
+                            actions: ({context: ctx, event: e})=> { 
                                 this.event(e)
                                 this.sendCfm(new CliConnStartCfm(e.error, e.origin, e.reason), ctx.savedStartReq)
                             }
                         },
                         Done: {
                             target: 'started',
-                            actions: (ctx, e)=> { 
+                            actions: ({context: ctx, event: e})=> { 
                                 this.sendCfm(new CliConnStartCfm(FW.ERROR_SUCCESS), ctx.savedStartReq)
                             }
                         }
                     },
                 }, 
                 stopping: {
-                    onEntry: (ctx, e)=>{ 
+                    id: 'stopping',
+                    entry: ({context: ctx, event: e})=>{ 
                         this.state('stopping') 
                         ctx.stoppingTimer.start(STOPPING_TIMEOUT_MS)
                         this.raise(new Evt('Done'))
                     },
-                    onExit: (ctx, e)=>{ 
+                    exit: ({context: ctx, event: e})=>{ 
                         ctx.stoppingTimer.stop()
                         this.recall()
                     },
                     on: { 
                         StoppingTimer: {
-                            actions: (ctx, e)=> { 
+                            actions: ({context: ctx, event: e})=> { 
                                 this.event(e)
                                 fw.assert(0)
                             }
                         },
                         Fail: {
-                            actions: (ctx, e)=> { 
+                            actions: ({context: ctx, event: e})=> { 
                                 this.event(e)
                                 fw.assert(0)
                             }
                         },
                         Done: {
                             target: 'stopped',
-                            actions: (ctx, e)=> { 
+                            actions: ({context: ctx, event: e})=> { 
                                 this.sendCfm(new CliConnStopCfm(FW.ERROR_SUCCESS), ctx.savedStopReq)
                             }
                         },
                         CliConnStopReq: {
-                            actions: (ctx, e)=>{
+                            actions: ({context: ctx, event: e})=>{
                                 this.event(e)
                                 this.defer(e)
                             }
@@ -198,11 +198,11 @@ class CliConn extends Hsm {
                 },                    
                 started: {
                     initial: 'idle',
-                    onEntry: (ctx, e)=>{ this.state('started') },
+                    entry: ({context: ctx, event: e})=>{ this.state('started') },
                     states: {
                         idle: {
                             id: 'idle',
-                            onEntry: (ctx, e)=>{ 
+                            entry: ({context: ctx, event: e})=>{ 
                                 this.state('idle')
                                 ctx.user = null
                                 ctx.username = null
@@ -211,7 +211,7 @@ class CliConn extends Hsm {
                             on: { 
                                 CliConnUseReq: {
                                     target: 'connected',
-                                    actions: (ctx, e)=> { 
+                                    actions: ({context: ctx, event: e})=> { 
                                         this.event(e)
                                         ctx.user = e.from
                                         ctx.sock = e.sock    
@@ -222,7 +222,7 @@ class CliConn extends Hsm {
                         },
                         connected: {
                             initial: 'unauth',
-                            onEntry: (ctx, e)=>{
+                            entry: ({context: ctx, event: e})=>{
                                 this.state('connected')
                                 ctx.error = null
                                 ctx.savedLine = ''
@@ -253,7 +253,7 @@ class CliConn extends Hsm {
                             },
                             on: {
                                 SockOnError: {
-                                    actions: (ctx, e)=> {
+                                    actions: ({context: ctx, event: e})=> {
                                         this.closeSock()
                                     }
                                 }
@@ -261,7 +261,7 @@ class CliConn extends Hsm {
                             on: {
                                 SockOnClosed: {
                                     target: '#idle',
-                                    actions: (ctx, e)=> {
+                                    actions: ({context: ctx, event: e})=> {
                                         this.event(e)
                                         this.sendInd(new CliConnDoneInd(ctx.error || FW.ERROR_NETWORK, this.name, FW.REASON_UNSPEC, ctx.nodeId), ctx.user)
                                     }
@@ -270,16 +270,16 @@ class CliConn extends Hsm {
                             states: {
                                 unauth: {
                                     id: 'unauth',
-                                    onEntry: (ctx, e)=>{
+                                    entry: ({context: ctx, event: e})=>{
                                         this.state('auth_unauth')
                                         ctx.authTimer.start(AUTH_TIMEOUT_MS)
                                     },
-                                    onExit: (ctx, e)=>{
+                                    exit: ({context: ctx, event: e})=>{
                                         ctx.authTimer.stop()
                                     },
                                     on: {
                                         AuthTimer: {
-                                            actions: (ctx, e)=> {
+                                            actions: ({context: ctx, event: e})=> {
                                                 this.event(e)
                                                 ctx.error = FW.ERROR_TIMEOUT
                                                 this.closeSock()
@@ -287,13 +287,13 @@ class CliConn extends Hsm {
                                         },
                                         AuthDone: {
                                             target: '#authenticated',
-                                            actions: (ctx, e)=> {
+                                            actions: ({context: ctx, event: e})=> {
                                                 this.event(e)                            
                                             }
                                         },
                                         SockOnMessage: {
-                                            cond: (ctx, e)=>(e.msg.type == 'SrvAuthReqMsg'),
-                                            actions: (ctx, e)=>{
+                                            guard: ({context: ctx, event: e})=>(e.msg.type == 'SrvAuthReqMsg'),
+                                            actions: ({context: ctx, event: e})=>{
                                                 this.event(e)
                                                 this.log('SockOnMessage: ', e.msg)
                                                 ctx.savedAuthReqMsg = e.msg
@@ -301,8 +301,8 @@ class CliConn extends Hsm {
                                             }
                                         },
                                         CmdSrvAuthCfm: {
-                                            cond: (ctx, e)=>this.matchSeq(e),
-                                            actions: (ctx, e)=>{
+                                            guard: ({context: ctx, event: e})=>this.matchSeq(e),
+                                            actions: ({context: ctx, event: e})=>{
                                                 this.event(e)
                                                 let reqMsg = ctx.savedAuthReqMsg
                                                 if (e.error == FW.ERROR_SUCCESS) {
@@ -321,7 +321,7 @@ class CliConn extends Hsm {
                                 },
                                 authenticated: {
                                     id: 'authenticated',
-                                    onEntry: (ctx, e)=>{
+                                    entry: ({context: ctx, event: e})=>{
                                         this.state('auth_authenticated')
                                         ctx.pingWaitTimer.start(PING_WAIT_TIMEOUT_MS, true)
                                         ctx.pingCnt = 0 
@@ -329,12 +329,12 @@ class CliConn extends Hsm {
                                         ctx.testCnt = 0
                                         //ctx.testTimer.start(TEST_TIMEOUT_MS, true)
                                     },
-                                    onExit: (ctx, e)=>{
+                                    exit: ({context: ctx, event: e})=>{
                                         ctx.pingWaitTimer.stop()
                                     },
                                     on: {
                                         PingWaitTimer: {
-                                            actions: (ctx, e)=> {
+                                            actions: ({context: ctx, event: e})=> {
                                                 this.event(e)
                                                 if (ctx.pingCnt > 0) {
                                                     ctx.pingCnt = 0
@@ -346,19 +346,19 @@ class CliConn extends Hsm {
                                         },
                                         // Test only.
                                         TestTimer: {
-                                            actions: (ctx, e)=> {
+                                            actions: ({context: ctx, event: e})=> {
                                                 this.event(e)
                                                 this.sendReqMsg(new DispTickerReqMsg({text:`CNT:${ctx.testCnt++}  `, fgColor:{r:0,g:0,b:0}, bgColor:{r:0,g:0,b:0}}, 0), ctx.nodeId)
                                             }
                                         },
                                         CliConnMsgReq: {
-                                            actions: (ctx, e)=> {
+                                            actions: ({context: ctx, event: e})=> {
                                                 this.event(e)
                                                 this.postMsg(e.msg)
                                             }
                                         },
                                         SockOnMessage: {
-                                            actions: (ctx, e)=>{
+                                            actions: ({context: ctx, event: e})=>{
                                                 this.event(e)
                                                 //this.log('SockOnMessage: ', e.msg)
                                                 if (e.msg.type == 'SrvPingReqMsg') {

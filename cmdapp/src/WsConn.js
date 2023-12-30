@@ -94,15 +94,14 @@ class WsConn extends Hsm {
             initial: 'stopped',
             on: { 
                 WsConnStartReq: {
-                    actions: (ctx, e)=> { 
+                    actions: ({context: ctx, event: e})=> { 
                         this.event(e)
                         this.sendCfm(new WsConnStartCfm(FW.ERROR_STATE, this.name), e)
                     }
                 },
                 WsConnStopReq: {
-                    target: 'stopping',
-                    internal: true,
-                    actions: (ctx, e)=>{
+                    target: '#stopping',
+                    actions: ({context: ctx, event: e})=>{
                         this.event(e)
                         ctx.savedStopReq = e
                     }
@@ -110,17 +109,17 @@ class WsConn extends Hsm {
             },
             states: {
                 stopped: {
-                    onEntry: (ctx, e)=>{ this.state('stopped') },
+                    entry: ({context: ctx, event: e})=>{ this.state('stopped') },
                     on: { 
                         WsConnStopReq: {
-                            actions: (ctx, e)=> { 
+                            actions: ({context: ctx, event: e})=> { 
                                 this.event(e)
                                 this.sendCfm(new WsConnStopCfm(), e)
                             }
                         },
                         WsConnStartReq: {
                             target: 'starting',
-                            actions: (ctx, e)=> { 
+                            actions: ({context: ctx, event: e})=> { 
                                 this.event(e)
                                 ctx.savedStartReq = e
                             }
@@ -128,69 +127,70 @@ class WsConn extends Hsm {
                     },
                 },
                 starting: {
-                    onEntry: (ctx, e)=>{ 
+                    entry: ({context: ctx, event: e})=>{ 
                         this.state('starting')
                         ctx.startingTimer.start(STARTING_TIMEOUT_MS)
                         // @todo Initialization
                         this.raise(new Evt('Done'))
                     },
-                    onExit: (ctx, e)=>{ 
+                    exit: ({context: ctx, event: e})=>{ 
                         ctx.startingTimer.stop()
                     },
                     on: { 
                         StartingTimer: {
-                            target: 'stopping',
-                            actions: (ctx, e)=> { 
+                            target: '#stopping',
+                            actions: ({context: ctx, event: e})=> { 
                                 this.event(e)
                                 this.sendCfm(new WsConnStartCfm(FW.ERROR_TIMEOUT, this.name), ctx.savedStartReq)
                             }
                         },
                         Fail: {
-                            target: 'stopping',
-                            actions: (ctx, e)=> { 
+                            target: '#stopping',
+                            actions: ({context: ctx, event: e})=> { 
                                 this.event(e)
                                 this.sendCfm(new WsConnStartCfm(e.error, e.origin, e.reason), ctx.savedStartReq)
                             }
                         },
                         Done: {
                             target: 'started',
-                            actions: (ctx, e)=> { 
+                            actions: ({context: ctx, event: e})=> { 
                                 this.sendCfm(new WsConnStartCfm(FW.ERROR_SUCCESS), ctx.savedStartReq)
                             }
                         }
                     },
                 }, 
                 stopping: {
-                    onEntry: (ctx, e)=>{ 
+                    id: 'stopping',
+                    entry: ({context: ctx, event: e})=>{ 
                         this.state('stopping') 
                         ctx.stoppingTimer.start(STOPPING_TIMEOUT_MS)
                         this.raise(new Evt('Done'))
                     },
-                    onExit: (ctx, e)=>{ 
+                    exit: ({context: ctx, event: e})=>{ 
                         ctx.stoppingTimer.stop()
                         this.recall()
                     },
                     on: { 
                         StoppingTimer: {
-                            actions: (ctx, e)=> { 
+                            actions: ({context: ctx, event: e})=> { 
                                 this.event(e)
                                 fw.assert(0)
                             }
                         },
                         Fail: {
-                            actions: (ctx, e)=> { 
+                            actions: ({context: ctx, event: e})=> { 
                                 this.event(e)
                                 fw.assert(0)
                             }
                         },
                         Done: {
                             target: 'stopped',
-                            actions: (ctx, e)=> { 
+                            actions: ({context: ctx, event: e})=> { 
                                 this.sendCfm(new WsConnStopCfm(FW.ERROR_SUCCESS), ctx.savedStopReq)
                             }
                         },
                         WsConnStopReq: {
-                            actions: (ctx, e)=>{
+                            actions: ({context: ctx, event: e})=>{
                                 this.event(e)
                                 this.defer(e)
                             }
@@ -199,11 +199,11 @@ class WsConn extends Hsm {
                 },                    
                 started: {
                     initial: 'idle',
-                    onEntry: (ctx, e)=>{ this.state('started') },
+                    entry: ({context: ctx, event: e})=>{ this.state('started') },
                     states: {
                         idle: {
                             id: 'idle',
-                            onEntry: (ctx, e)=>{ 
+                            entry: ({context: ctx, event: e})=>{ 
                                 this.state('idle')
                                 ctx.user = null
                                 ctx.username = null
@@ -212,7 +212,7 @@ class WsConn extends Hsm {
                             on: { 
                                 WsConnUseReq: {
                                     target: '#connected',
-                                    actions: (ctx, e)=> { 
+                                    actions: ({context: ctx, event: e})=> { 
                                         this.event(e)
                                         ctx.user = e.from
                                         ctx.ws = e.ws 
@@ -224,7 +224,7 @@ class WsConn extends Hsm {
                         connected: {
                             id: 'connected',
                             initial: 'unauth',
-                            onEntry: (ctx, e)=>{
+                            entry: ({context: ctx, event: e})=>{
                                 this.state('connected')
                                 ctx.ws.on('message', (m)=>{
                                     this.log('ws received: ', m)
@@ -241,14 +241,14 @@ class WsConn extends Hsm {
                             },
                             on: {
                                 WsOnClosed: {
-                                    actions: (ctx, e)=> {
+                                    actions: ({context: ctx, event: e})=> {
                                         this.event(e)
                                         this.raise(new Closed(FW.ERROR_NETWORK, this.name))
                                     }
                                 },
                                 Closed: {
                                     target: '#idle',
-                                    actions: (ctx, e)=> {
+                                    actions: ({context: ctx, event: e})=> {
                                         this.event(e)
                                         this.sendInd(new WsConnDoneInd(e.error, e.origin, e.reason, ctx.nodeId), ctx.user)
                                     }
@@ -257,16 +257,16 @@ class WsConn extends Hsm {
                             states: {
                                 unauth: {
                                     id: 'unauth',
-                                    onEntry: (ctx, e)=>{
+                                    entry: ({context: ctx, event: e})=>{
                                         this.state('unauth')
                                         ctx.authTimer.start(AUTH_TIMEOUT_MS)
                                     },
-                                    onExit: (ctx, e)=>{
+                                    exit: ({context: ctx, event: e})=>{
                                         ctx.authTimer.stop()
                                     },
                                     on: {
                                         AuthTimer: {
-                                            actions: (ctx, e)=> {
+                                            actions: ({context: ctx, event: e})=> {
                                                 this.event(e)
                                                 ctx.ws.close()
                                                 this.raise(new Closed(FW.ERROR_TIMEOUT, this.name))
@@ -274,13 +274,13 @@ class WsConn extends Hsm {
                                         },
                                         AuthDone: {
                                             target: '#authenticated',
-                                            actions: (ctx, e)=> {
+                                            actions: ({context: ctx, event: e})=> {
                                                 this.event(e)
                                             }
                                         },
                                         WsOnMessage: {
-                                            cond: (ctx, e)=>(e.msg.type == 'SrvAuthReqMsg'),
-                                            actions: (ctx, e)=>{
+                                            guard: ({context: ctx, event: e})=>(e.msg.type == 'SrvAuthReqMsg'),
+                                            actions: ({context: ctx, event: e})=>{
                                                 this.event(e)
                                                 this.log('WsOnMessage: ', e.msg)
                                                 ctx.savedAuthReqMsg = e.msg
@@ -288,8 +288,8 @@ class WsConn extends Hsm {
                                             }
                                         },
                                         CmdSrvAuthCfm: {
-                                            cond: (ctx, e)=>this.matchSeq(e),
-                                            actions: (ctx, e)=>{
+                                            guard: ({context: ctx, event: e})=>this.matchSeq(e),
+                                            actions: ({context: ctx, event: e})=>{
                                                 this.event(e)
                                                 let reqMsg = ctx.savedAuthReqMsg
                                                 if (e.error == FW.ERROR_SUCCESS) {
@@ -308,17 +308,17 @@ class WsConn extends Hsm {
                                 },
                                 authenticated: {
                                     id: 'authenticated',
-                                    onEntry: (ctx, e)=>{
+                                    entry: ({context: ctx, event: e})=>{
                                         this.state('authenticated')
                                         ctx.pingWaitTimer.start(PING_WAIT_TIMEOUT_MS, true)
                                         ctx.pingCnt = 0 
                                     },
-                                    onExit: (ctx, e)=>{
+                                    exit: ({context: ctx, event: e})=>{
                                         ctx.pingWaitTimer.stop()
                                     },
                                     on: {
                                         PingWaitTimer: {
-                                            actions: (ctx, e)=> {
+                                            actions: ({context: ctx, event: e})=> {
                                                 this.event(e)
                                                 if (ctx.pingCnt > 0) {
                                                     ctx.pingCnt = 0
@@ -329,13 +329,13 @@ class WsConn extends Hsm {
                                             }
                                         },
                                         WsConnMsgReq: {
-                                            actions: (ctx, e)=> {
+                                            actions: ({context: ctx, event: e})=> {
                                                 this.event(e)
                                                 this.postMsg(e.msg)
                                             }
                                         },
                                         WsOnMessage: {
-                                            actions: (ctx, e)=>{
+                                            actions: ({context: ctx, event: e})=>{
                                                 this.event(e)
                                                 //this.log('WsOnMessage: ', e.msg)
                                                 if (e.msg.type == 'SrvPingReqMsg') {

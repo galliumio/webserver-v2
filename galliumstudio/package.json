@@ -12,7 +12,7 @@
   "dependencies": {
     "setimmediate": "^1.0.5",
     "tiny-emitter": "^2.1.0",
-    "xstate": "^4.34.0"
+    "xstate": "^5.4.1"
   },
   "devDependencies": {
     "@babel/cli": "^7.19.3",

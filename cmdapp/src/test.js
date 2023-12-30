@@ -77,7 +77,7 @@ class SysMgr extends Hsm {
                   region1: {
                     on: { 
                       EVENTA: {
-                        actions: (ctx, e) => { 
+                        actions: ({context: ctx, event: e}) => { 
                           console.log("region1 gets EVENT"); 
                           console.log(ctx.var1++, ctx.name);
                           console.log(e.type);
@@ -92,7 +92,7 @@ class SysMgr extends Hsm {
                   region2: {
                     on: { 
                       EVENTB: {
-                        actions: (ctx, e)=> { 
+                        actions: ({context: ctx, event: e})=> { 
                           console.log(`region2 gets ${e.type}`); 
                         }
                       }

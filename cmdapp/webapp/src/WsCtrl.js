@@ -102,15 +102,14 @@ export class WsCtrl extends Hsm {
             initial: 'stopped',
             on: { 
                 WsCtrlStartReq: {
-                    actions: (ctx, e)=> { 
+                    actions: ({context: ctx, event: e})=> { 
                         this.event(e)
                         this.sendCfm(new WsCtrlStartCfm(FW.ERROR_STATE, this.name), e)
                     }
                 },
                 WsCtrlStopReq: {
-                    target: 'stopping',
-                    internal: true,
-                    actions: (ctx, e)=>{
+                    target: '#stopping',
+                    actions: ({context: ctx, event: e})=>{
                         this.event(e)
                         ctx.savedStopReq = e
                     }
@@ -118,17 +117,17 @@ export class WsCtrl extends Hsm {
             },
             states: {
                 stopped: {
-                    onEntry: (ctx, e)=>{ this.state('stopped') },
+                    entry: ({context: ctx, event: e})=>{ this.state('stopped') },
                     on: { 
                         WsCtrlStopReq: {
-                            actions: (ctx, e)=> { 
+                            actions: ({context: ctx, event: e})=> { 
                                 this.event(e)
                                 this.sendCfm(new WsCtrlStopCfm(), e)
                             }
                         },
                         WsCtrlStartReq: {
                             target: 'starting',
-                            actions: (ctx, e)=> { 
+                            actions: ({context: ctx, event: e})=> { 
                                 this.event(e)
                                 ctx.savedStartReq = e
                             }
@@ -136,69 +135,70 @@ export class WsCtrl extends Hsm {
                     },
                 },
                 starting: {
-                    onEntry: (ctx, e)=>{ 
+                    entry: ({context: ctx, event: e})=>{ 
                         this.state('starting')
                         ctx.startingTimer.start(STARTING_TIMEOUT_MS)
                         // @todo Initialization
                         this.raise(new Evt('Done'))
                     },
-                    onExit: (ctx, e)=>{ 
+                    exit: ({context: ctx, event: e})=>{ 
                         ctx.startingTimer.stop()
                     },
                     on: { 
                         StartingTimer: {
-                            target: 'stopping',
-                            actions: (ctx, e)=> { 
+                            target: '#stopping',
+                            actions: ({context: ctx, event: e})=> { 
                                 this.event(e)
                                 this.sendCfm(new WsCtrlStartCfm(FW.ERROR_TIMEOUT, this.name), ctx.savedStartReq)
                             }
                         },
                         Fail: {
-                            target: 'stopping',
-                            actions: (ctx, e)=> { 
+                            target: '#stopping',
+                            actions: ({context: ctx, event: e})=> { 
                                 this.event(e)
                                 this.sendCfm(new WsCtrlStartCfm(e.error, e.origin, e.reason), ctx.savedStartReq)
                             }
                         },
                         Done: {
                             target: 'started',
-                            actions: (ctx, e)=> { 
+                            actions: ({context: ctx, event: e})=> { 
                                 this.sendCfm(new WsCtrlStartCfm(FW.ERROR_SUCCESS), ctx.savedStartReq)
                             }
                         }
                     },
                 }, 
                 stopping: {
-                    onEntry: (ctx, e)=>{ 
+                    id: 'stopping',
+                    entry: ({context: ctx, event: e})=>{ 
                         this.state('stopping') 
                         ctx.stoppingTimer.start(STOPPING_TIMEOUT_MS)
                         this.raise(new Evt('Done'))
                     },
-                    onExit: (ctx, e)=>{ 
+                    exit: ({context: ctx, event: e})=>{ 
                         ctx.stoppingTimer.stop()
                         this.recall()
                     },
                     on: { 
                         StoppingTimer: {
-                            actions: (ctx, e)=> { 
+                            actions: ({context: ctx, event: e})=> { 
                                 this.event(e)
                                 fw.assert(0)
                             }
                         },
                         Fail: {
-                            actions: (ctx, e)=> { 
+                            actions: ({context: ctx, event: e})=> { 
                                 this.event(e)
                                 fw.assert(0)
                             }
                         },
                         Done: {
                             target: 'stopped',
-                            actions: (ctx, e)=> { 
+                            actions: ({context: ctx, event: e})=> { 
                                 this.sendCfm(new WsCtrlStopCfm(FW.ERROR_SUCCESS), ctx.savedStopReq)
                             }
                         },
                         WsCtrlStopReq: {
-                            actions: (ctx, e)=>{
+                            actions: ({context: ctx, event: e})=>{
                                 this.event(e)
                                 this.defer(e)
                             }
@@ -208,26 +208,24 @@ export class WsCtrl extends Hsm {
                 started: {
                     id: 'started',
                     initial: 'idle',
-                    onEntry: (ctx, e)=>{ this.state('started') },
+                    entry: ({context: ctx, event: e})=>{ this.state('started') },
                     on: {
                         WsCtrlOpenReq: {
-                            actions: (ctx, e)=>{
+                            actions: ({context: ctx, event: e})=>{
                                 this.event(e)
                                 this.sendCfm(new WsCtrlOpenCfm(FW.ERROR_STATE, this.name), e)
                             }
                         },
                         OpenFail: {
                             target: '#idle',
-                            internal: true,     // Avoid re-entering the source state.
-                            actions: (ctx, e)=>{
+                            actions: ({context: ctx, event: e})=>{
                                 this.event(e)
                                 this.sendCfm(new WsCtrlOpenCfm(e.error, e.origin, e.reason), ctx.savedOpenReq)
                             } 
                         },
                         Closed: {
                             target: '#idle',
-                            internal: true,
-                            actions: (ctx, e)=>{
+                            actions: ({context: ctx, event: e})=>{
                                 this.event(e)
                                 this.sendInd(new WsCtrlCloseInd(e.error, e.origin, e.reason), ctx.user)
                             }
@@ -236,21 +234,21 @@ export class WsCtrl extends Hsm {
                     states: {
                         idle: {
                             id: 'idle',
-                            onEntry: (ctx, e)=>{ 
+                            entry: ({context: ctx, event: e})=>{ 
                                 this.state('idle')
                                 ctx.user = null
                                 ctx.nodeId = FW.UNDEF
                             },
                             on: { 
                                 WsCtrlCloseReq: {
-                                    actions: (ctx, e)=>{
+                                    actions: ({context: ctx, event: e})=>{
                                         this.event(e)
                                         this.sendCfm(new WsCtrlCloseCfm(), e)
                                     }
                                 },
                                 WsCtrlOpenReq: {
                                     target: 'opening',
-                                    actions: (ctx, e)=> { 
+                                    actions: ({context: ctx, event: e})=> { 
                                         this.event(e)
                                         this.log(`URL = ${e.url}`)
                                         ctx.user = e.from
@@ -261,38 +259,38 @@ export class WsCtrl extends Hsm {
                         },
                         opening: {
                             initial: 'openWait',
-                            onEntry: (ctx, e)=>{
+                            entry: ({context: ctx, event: e})=>{
                                 this.state('opening')
                                 ctx.openingTimer.start(OPENING_TIMEOUT_MS)
                             },
-                            onExit: (ctx, e)=>{
+                            exit: ({context: ctx, event: e})=>{
                                 ctx.openingTimer.stop()
                                 this.recall()
                             },
                             on: {
                                 OpeningTimer: {
-                                    actions: (ctx, e)=> { 
+                                    actions: ({context: ctx, event: e})=> { 
                                         this.event(e)
                                         ctx.ws.close()
                                         this.raise(new OpenFail(FW.ERROR_TIMEOUT, this.name))
                                     }
                                 },
                                 WsOnClose: {
-                                    actions: (ctx, e)=> { 
+                                    actions: ({context: ctx, event: e})=> { 
                                         this.event(e)
                                         ctx.ws.close()
                                         this.raise(new OpenFail(FW.ERROR_NETWORK, this.name))
                                     }
                                 },
                                 WsOnError: {
-                                    actions: (ctx, e)=> { 
+                                    actions: ({context: ctx, event: e})=> { 
                                         this.event(e)
                                         ctx.ws.close()
                                         this.raise(new OpenFail(FW.ERROR_NETWORK, this.name))
                                     }
                                 },
                                 WsCtrlCloseReq: {
-                                    actions: (ctx, e)=> { 
+                                    actions: ({context: ctx, event: e})=> { 
                                         this.event(e)
                                         this.defer(e)
                                         ctx.ws.close()
@@ -300,7 +298,7 @@ export class WsCtrl extends Hsm {
                                     }
                                 },
                                 WsCtrlStopReq: {
-                                    actions: (ctx, e)=> { 
+                                    actions: ({context: ctx, event: e})=> { 
                                         this.event(e)
                                         this.defer(e)
                                         ctx.ws.close()
@@ -310,7 +308,7 @@ export class WsCtrl extends Hsm {
                             },
                             states: {
                                 openWait: {
-                                    onEntry: (ctx, e)=>{
+                                    entry: ({context: ctx, event: e})=>{
                                         this.state('openWait')
                                         ctx.ws = new WebSocket(ctx.savedOpenReq.url)
                                         ctx.ws.addEventListener('open', (event)=>{
@@ -328,19 +326,19 @@ export class WsCtrl extends Hsm {
                                     },
                                     on: {
                                         WsOnOpen: {
-                                            actions: (ctx, e)=>{
+                                            actions: ({context: ctx, event: e})=>{
                                                 this.event(e)
                                                 ctx.openDelayTimer.start(OPEN_DELAY_TIMEOUT_MS)
                                             }
                                         },
                                         OpenDelayTimer: {
                                             target: 'authWait',
-                                            actions: (ctx, e)=>{this.event(e)}
+                                            actions: ({context: ctx, event: e})=>{this.event(e)}
                                         },
                                     }
                                 },
                                 authWait: {
-                                    onEntry: (ctx, e)=>{
+                                    entry: ({context: ctx, event: e})=>{
                                         this.state('authWait')
                                         let {username, password} = ctx.savedOpenReq
                                         this.sendReqMsg(new SrvAuthReqMsg(username, password, ctx.nodeId), ctx.srvId)
@@ -349,10 +347,10 @@ export class WsCtrl extends Hsm {
                                         WsOnMessage: [
                                             {
                                                 target: '#opened',
-                                                cond: (ctx, e)=>{
+                                                guard: ({context: ctx, event: e})=>{
                                                     return (e.msg.type == 'SrvAuthCfmMsg') && (e.msg.error == FW.ERROR_SUCCESS)
                                                 },
-                                                actions: (ctx, e)=>{
+                                                actions: ({context: ctx, event: e})=>{
                                                     this.event(e)
                                                     this.log('WsOnMessage: ', e.msg)
                                                     ctx.nodeId = e.msg.nodeId
@@ -360,10 +358,10 @@ export class WsCtrl extends Hsm {
                                                 }
                                             },
                                             {
-                                                cond: (ctx, e)=>{
+                                                guard: ({context: ctx, event: e})=>{
                                                     return (e.msg.type == 'SrvAuthCfmMsg') && (e.msg.error != FW.ERROR_SUCCESS)
                                                 },
-                                                actions: (ctx, e)=>{
+                                                actions: ({context: ctx, event: e})=>{
                                                     this.event(e)
                                                     this.log('WsOnMessage: ', e.msg)
                                                     ctx.ws.close()
@@ -377,11 +375,11 @@ export class WsCtrl extends Hsm {
                         },
                         opened: {
                             id: 'opened',
-                            onEntry: (ctx, e)=>{
+                            entry: ({context: ctx, event: e})=>{
                                 this.state('opened')
                                 ctx.pingReqTimer.start(SRV_PING_PERIOD_MS, true)
                             },
-                            onExit: (ctx, e)=>{
+                            exit: ({context: ctx, event: e})=>{
                                 ctx.pingReqTimer.stop()
                                 ctx.pingCfmTimer.stop()
                                 ctx.ws.close()
@@ -389,33 +387,33 @@ export class WsCtrl extends Hsm {
                             },
                             on: {
                                 PingReqTimer: {
-                                    actions: (ctx, e)=>{
+                                    actions: ({context: ctx, event: e})=>{
                                         this.event(e)
                                         this.sendReqMsg(new SrvPingReqMsg(), ctx.srvId)
                                         ctx.pingCfmTimer.start(PING_CFM_TIMEOUT_MS)
                                     }
                                 },
                                 PingCfmTimer: {
-                                    actions: (ctx, e)=>{
+                                    actions: ({context: ctx, event: e})=>{
                                         this.event(e)
                                         this.raise(new Closed(FW.ERROR_TIMEOUT), this.name)
                                     }
                                 },
                                 WsOnClose: {
-                                    actions: (ctx, e)=>{
+                                    actions: ({context: ctx, event: e})=>{
                                         this.event(e)
                                         this.raise(new Closed(FW.ERROR_NETWORK), this.name)
                                     }
                                 },
                                 WsCtrlMsgReq: {
-                                    actions: (ctx, e)=>{
+                                    actions: ({context: ctx, event: e})=>{
                                         this.event(e)
                                         this.log(`WsCtrlMsgReq (msgTo=${e.msgTo}, msgSeq=${e.msgSeq}): `, e.msg)
                                         this.sendMsg(e.msg, e.msgTo, e.msgSeq)
                                     }
                                 },                           
                                 WsOnMessage: {
-                                    actions: (ctx, e)=>{
+                                    actions: ({context: ctx, event: e})=>{
                                         this.event(e)
                                         this.log('WsOnMessage: ', e.msg)
                                         if (e.msg.type == 'SrvPingCfmMsg') {
