@@ -426,8 +426,6 @@ class TcpConn extends Hsm {
                                                         this.raise(new Evt('CheckMsgHdr'))
                                                     }
                                                 },
-                                                // Work-around for local transition to itself.
-                                                CheckMsgHdr: '#headerWait'
                                             }
                                         },
                                         bodyWait: {
@@ -463,9 +461,7 @@ class TcpConn extends Hsm {
                                                         ctx.msgBuf = Buffer.concat([ctx.msgBuf, e.buffer])
                                                         this.raise(new Evt('CheckMsgBody'))
                                                     }
-                                                },
-                                                // Work-around for local transition to itself.
-                                                CheckMsgBody: '#bodyWait'                                                
+                                                },                                             
                                             }
                                         },
                                     }
