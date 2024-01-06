@@ -491,6 +491,10 @@ export class WebApp extends Hsm {
                                                         guard: ({context: ctx, event: e})=>(ctx.tickerIdx < ctx.tickerData.length),
                                                         target: '#ledPanelSending',
                                                         // Self-transition must NOT be 'internal'.
+                                                        // In XState V5, default is 'external' so we must add 'reenter: true' to force the state to be reentered upon 
+                                                        // a self transition. Note this is non-conformant to scxml in which the concept of 'external' and 'internal' 
+                                                        // transitions only applies to parent to proper child state transitions. 
+                                                        reenter: true,
                                                         actions: ({context: ctx, event: e})=>{
                                                             this.event(e)
                                                             this.log(`Done: idx = ${ctx.tickerIdx}, len = ${ctx.tickerData.length}`)
